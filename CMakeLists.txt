@@ -28,6 +28,12 @@ target_include_directories(RNetMsgBroker
     $<INSTALL_INTERFACE:include>
 )
 
+target_include_directories(RNetMsgBroker
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
+
 target_link_libraries(RNetMsgBroker PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 
 target_compile_definitions(RNetMsgBroker
