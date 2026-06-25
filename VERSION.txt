@@ -1,0 +1,7 @@
+RNetMsgBroker 0.2.1
+
+Änderung:
+- id_parts werden aus der CAN-ID dekodiert
+- fields/fieds werden aus dem Daten-Payload dekodiert
+- toString() liefert kurze Broker-Zeilen: Name (id_parts); fields...
+- Beispiel: 0x56710#00aabb -> RnetMsg_xyz (Modul=1); field_1=0xaa; field_2=0xbb

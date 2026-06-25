@@ -1,0 +1,738 @@
+{
+  "$schema": "RNetMsgBroker/1",
+  "description": "Editierbare R-Net Frame-Definitionen fuer RNetMsgBroker. Zahlen koennen als JSON-Zahl oder als String wie 0x1F000000 angegeben werden. fields[] koennen zyklu/zyklus, einheit/unit und descipt/description enthalten.",
+  "frames": [
+    {
+      "extended": false,
+      "remote": "data",
+      "Id-and-mask": "0x56700",
+      "id-result": "0x56700",
+      "key-mask": "0xFFF0F",
+      "rnet_name": "RnetMsg_xyz",
+      "frametype": "example",
+      "summary": "Beispiel: Modul kommt aus der CAN-ID, Felder aus den Daten nach #.",
+      "id_parts": [
+        {
+          "name": "Modul",
+          "bit_mask": "0xf0",
+          "shift": 4,
+          "big_endien": false
+        }
+      ],
+      "fields": [
+        {
+          "name": "field_1",
+          "bit_mask": "0x00ff00",
+          "shift": 8,
+          "big_endien": false,
+          "zyklu": "20ms",
+          "einheit": "",
+          "descipt": "oberes Beispiel-Datenbyte"
+        },
+        {
+          "name": "field_2",
+          "bit_mask": "0x0000ff",
+          "shift": 0,
+          "big_endien": false,
+          "zyklu": "20ms",
+          "einheit": "",
+          "descipt": "unteres Beispiel-Datenbyte"
+        }
+      ]
+    },
+    {
+      "extended": false,
+      "remote": "rtr",
+      "Id-and-mask": "0x7FF",
+      "id-result": "0x4",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetSleepWakeRtr",
+      "frametype": "power",
+      "summary": "sleep/wake sequence RTR"
+    },
+    {
+      "extended": false,
+      "remote": "data",
+      "Id-and-mask": "0x7FF",
+      "id-result": "0x2",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetJsmInitSeen",
+      "frametype": "power",
+      "summary": "seen during JSM init"
+    },
+    {
+      "extended": false,
+      "remote": "rtr",
+      "Id-and-mask": "0x7FF",
+      "id-result": "0x7B1",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetConfigMode1Request",
+      "frametype": "config",
+      "summary": "PM requests drop to config mode 1"
+    },
+    {
+      "extended": false,
+      "remote": "rtr",
+      "Id-and-mask": "0x7FF",
+      "id-result": "0x7B0",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetConfigMode0Request",
+      "frametype": "config",
+      "summary": "PM requests drop to config mode 0"
+    },
+    {
+      "extended": false,
+      "remote": "any",
+      "Id-and-mask": "0x7FF",
+      "id-result": "0x7E0",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetDiagnosticsReserved7E0",
+      "frametype": "config",
+      "summary": "unknown diagnostics/reserved frame reported from DongleInterface.dll data"
+    },
+    {
+      "extended": false,
+      "remote": "data",
+      "Id-and-mask": "0x7F0",
+      "id-result": "0x60",
+      "key-mask": "0xFFFFFFF0",
+      "rnet_name": "RNetStdMotorOrModeStatus",
+      "frametype": "motor",
+      "summary": "standard 06X status/mode response family",
+      "id_parts": [
+        {
+          "mask": "0x00F",
+          "name": "module",
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": false,
+      "remote": "data",
+      "Id-and-mask": "0x7FF",
+      "id-result": "0x78F",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetProgrammerQuickRequest",
+      "frametype": "pop-quick",
+      "summary": "R-Net Programmer POP Quick request"
+    },
+    {
+      "extended": false,
+      "remote": "data",
+      "Id-and-mask": "0x7FF",
+      "id-result": "0x793",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetProgrammerQuickResponse",
+      "frametype": "pop-quick",
+      "summary": "R-Net Programmer POP Quick response"
+    },
+    {
+      "extended": true,
+      "remote": "any",
+      "Id-and-mask": "0x1F00F000",
+      "id-result": "0x1F000000",
+      "key-mask": "0x1F00F000",
+      "rnet_name": "RNetSerialExchangeSeq0",
+      "frametype": "serial",
+      "summary": "extended serial challenge/response sequence 0",
+      "id_parts": [
+        {
+          "mask": "0x0000F000",
+          "name": "sequence",
+          "shift": 12,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "any",
+      "Id-and-mask": "0x1F00F000",
+      "id-result": "0x1F001000",
+      "key-mask": "0x1F00F000",
+      "rnet_name": "RNetSerialExchangeSeq1",
+      "frametype": "serial",
+      "summary": "extended serial challenge/response sequence 1",
+      "id_parts": [
+        {
+          "mask": "0x0000F000",
+          "name": "sequence",
+          "shift": 12,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "any",
+      "Id-and-mask": "0x1F00F000",
+      "id-result": "0x1F002000",
+      "key-mask": "0x1F00F000",
+      "rnet_name": "RNetSerialExchangeSeq2",
+      "frametype": "serial",
+      "summary": "extended serial challenge/response sequence 2",
+      "id_parts": [
+        {
+          "mask": "0x0000F000",
+          "name": "sequence",
+          "shift": 12,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "any",
+      "Id-and-mask": "0x1F00F000",
+      "id-result": "0x1F003000",
+      "key-mask": "0x1F00F000",
+      "rnet_name": "RNetSerialExchangeSeq3",
+      "frametype": "serial",
+      "summary": "extended serial challenge/response sequence 3",
+      "id_parts": [
+        {
+          "mask": "0x0000F000",
+          "name": "sequence",
+          "shift": 12,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "any",
+      "Id-and-mask": "0x1F00F000",
+      "id-result": "0x1F004000",
+      "key-mask": "0x1F00F000",
+      "rnet_name": "RNetSerialExchangeSeq4",
+      "frametype": "serial",
+      "summary": "extended serial challenge/response sequence 4",
+      "id_parts": [
+        {
+          "mask": "0x0000F000",
+          "name": "sequence",
+          "shift": 12,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "any",
+      "Id-and-mask": "0x1F00F000",
+      "id-result": "0x1F005000",
+      "key-mask": "0x1F00F000",
+      "rnet_name": "RNetSerialExchangeSeq5",
+      "frametype": "serial",
+      "summary": "extended serial challenge/response sequence 5",
+      "id_parts": [
+        {
+          "mask": "0x0000F000",
+          "name": "sequence",
+          "shift": 12,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "any",
+      "Id-and-mask": "0x1F00F000",
+      "id-result": "0x1F006000",
+      "key-mask": "0x1F00F000",
+      "rnet_name": "RNetSerialExchangeSeq6",
+      "frametype": "serial",
+      "summary": "extended serial challenge/response sequence 6",
+      "id_parts": [
+        {
+          "mask": "0x0000F000",
+          "name": "sequence",
+          "shift": 12,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "any",
+      "Id-and-mask": "0x1F00F000",
+      "id-result": "0x1F007000",
+      "key-mask": "0x1F00F000",
+      "rnet_name": "RNetSerialExchangeSeq7",
+      "frametype": "serial",
+      "summary": "extended serial challenge/response sequence 7",
+      "id_parts": [
+        {
+          "mask": "0x0000F000",
+          "name": "sequence",
+          "shift": 12,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0x1FFFFF00",
+      "id-result": "0x1F800000",
+      "key-mask": "0x1FFFFF00",
+      "rnet_name": "RNetColorJsmSlot8CryForHelp",
+      "frametype": "serial",
+      "summary": "cJSM slot-8 authentication retry/cry-for-help family",
+      "id_parts": [
+        {
+          "mask": "0x000000FF",
+          "name": "slot",
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0x1FFFFF00",
+      "id-result": "0x1F900000",
+      "key-mask": "0x1FFFFF00",
+      "rnet_name": "RNetColorJsmAuthResponse90",
+      "frametype": "serial",
+      "summary": "cJSM/PM authentication response family 0x1F90",
+      "id_parts": [
+        {
+          "mask": "0x000000FF",
+          "name": "slot",
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0x1FFFFF00",
+      "id-result": "0x1F910000",
+      "key-mask": "0x1FFFFF00",
+      "rnet_name": "RNetColorJsmAuthResponse91",
+      "frametype": "serial",
+      "summary": "cJSM/PM authentication response family 0x1F91",
+      "id_parts": [
+        {
+          "mask": "0x000000FF",
+          "name": "slot",
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0x1FFFFFF0",
+      "id-result": "0x1FB00000",
+      "key-mask": "0x1FFFFFF0",
+      "rnet_name": "RNetDeviceSerialSlot",
+      "frametype": "serial",
+      "summary": "device slot serial-number broadcast",
+      "id_parts": [
+        {
+          "mask": "0x0000000F",
+          "name": "slot",
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "any",
+      "Id-and-mask": "0x1FC00000",
+      "id-result": "0x1E000000",
+      "key-mask": "0x1FC00000",
+      "rnet_name": "RNetPopSegmentedResponse",
+      "frametype": "pop-segmented",
+      "summary": "POP segmented response base family",
+      "id_parts": [
+        {
+          "mask": "0x003F0000",
+          "name": "segment",
+          "shift": 16,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "any",
+      "Id-and-mask": "0x1FC00000",
+      "id-result": "0x1E400000",
+      "key-mask": "0x1FC00000",
+      "rnet_name": "RNetPopSegmentedRequest",
+      "frametype": "pop-segmented",
+      "summary": "POP segmented request base family",
+      "id_parts": [
+        {
+          "mask": "0x003F0000",
+          "name": "segment",
+          "shift": 16,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0x1E3C0001",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetConfigTransferHeader1",
+      "frametype": "config-xfer",
+      "summary": "configuration transfer header segment 1"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0x1E3C0002",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetConfigTransferHeader2",
+      "frametype": "config-xfer",
+      "summary": "configuration transfer header segment 2"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0x1E3D0003",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetConfigTransferHeaderCrc",
+      "frametype": "config-xfer",
+      "summary": "configuration transfer header CRC segment"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0x1E4D0003",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetConfigTransferBlockEnd",
+      "frametype": "config-xfer",
+      "summary": "configuration transfer data block end"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0x1E4E0001",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetConfigTransferData1",
+      "frametype": "config-xfer",
+      "summary": "configuration transfer data segment 1"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0x1E4F0002",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetConfigTransferDataCrc",
+      "frametype": "config-xfer",
+      "summary": "configuration transfer data segment with CRC"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0x1E80000F",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetConfigTransferComplete",
+      "frametype": "config-xfer",
+      "summary": "configuration transfer complete/status"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFF0F",
+      "id-result": "0xA400D00",
+      "key-mask": "0xFFFFFF0F",
+      "rnet_name": "RNetSpeedOrBtUnknown0A400D",
+      "frametype": "speed-btm",
+      "summary": "unknown 0A400D0M status/control family",
+      "id_parts": [
+        {
+          "mask": "0x000000F0",
+          "name": "module",
+          "shift": 4,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0xA400002",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetBtmStatus0002",
+      "frametype": "btm",
+      "summary": "Bluetooth module status"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0xA400102",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetBtmStatus0102",
+      "frametype": "btm",
+      "summary": "Bluetooth module status"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0xA400300",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetBtmControl0300",
+      "frametype": "btm",
+      "summary": "Bluetooth module control"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0xA400301",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetBtmControl0301",
+      "frametype": "btm",
+      "summary": "Bluetooth module control"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0xC000400",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetLampControlStatus",
+      "frametype": "lighting",
+      "summary": "lamp control status bitmap",
+      "fields": [
+        {
+          "sig_name": "left_indicator",
+          "bit_mask": "0x01",
+          "shift": 0,
+          "big_endien": false
+        },
+        {
+          "sig_name": "right_indicator",
+          "bit_mask": "0x02",
+          "shift": 1,
+          "big_endien": false
+        },
+        {
+          "sig_name": "hazard",
+          "bit_mask": "0x04",
+          "shift": 2,
+          "big_endien": false
+        },
+        {
+          "sig_name": "lights",
+          "bit_mask": "0x08",
+          "shift": 3,
+          "big_endien": false
+        },
+        {
+          "sig_name": "horn_or_aux",
+          "bit_mask": "0x10",
+          "shift": 4,
+          "big_endien": false
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFF0FF",
+      "id-result": "0xC000000",
+      "key-mask": "0xFFFFF0FF",
+      "rnet_name": "RNetJsmNetworkErrorTrigger",
+      "frametype": "error",
+      "summary": "frame family known to trigger JSM network error",
+      "id_parts": [
+        {
+          "mask": "0x00000F00",
+          "name": "module",
+          "shift": 8,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFF0",
+      "id-result": "0xC040D00",
+      "key-mask": "0xFFFFFFF0",
+      "rnet_name": "RNetPeriodic0C040D0X",
+      "frametype": "unknown",
+      "summary": "periodic 0C040D0X family",
+      "id_parts": [
+        {
+          "mask": "0x0000000F",
+          "name": "slot",
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFF00",
+      "id-result": "0xC180100",
+      "key-mask": "0xFFFFFF00",
+      "rnet_name": "RNetModuleStatus0C1801",
+      "frametype": "module",
+      "summary": "module status/control family 0C1801xx",
+      "id_parts": [
+        {
+          "mask": "0x000000FF",
+          "name": "module",
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFF00",
+      "id-result": "0xC180200",
+      "key-mask": "0xFFFFFF00",
+      "rnet_name": "RNetModuleStatus0C1802",
+      "frametype": "module",
+      "summary": "module status/control family 0C1802xx",
+      "id_parts": [
+        {
+          "mask": "0x000000FF",
+          "name": "module",
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFF00",
+      "id-result": "0xC180400",
+      "key-mask": "0xFFFFFF00",
+      "rnet_name": "RNetModuleStatus0C1804",
+      "frametype": "module",
+      "summary": "module status/control family 0C1804xx",
+      "id_parts": [
+        {
+          "mask": "0x000000FF",
+          "name": "module",
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFF0FF",
+      "id-result": "0x140C0001",
+      "key-mask": "0xFFFFF0FF",
+      "rnet_name": "RNetMotorUnknown140C",
+      "frametype": "motor",
+      "summary": "unknown motor-related 140C0X01 family",
+      "id_parts": [
+        {
+          "mask": "0x00000F00",
+          "name": "module",
+          "shift": 8,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0xC000302",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetModule3Interaction302",
+      "frametype": "ui",
+      "summary": "module 3 interaction"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFFFFF",
+      "id-result": "0xC000304",
+      "key-mask": "0xFFFFFFFF",
+      "rnet_name": "RNetModule3Interaction304",
+      "frametype": "ui",
+      "summary": "module 3 interaction"
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFF0FF",
+      "id-result": "0x1C200000",
+      "key-mask": "0xFFFFF0FF",
+      "rnet_name": "RNetJsmDisplayStatus",
+      "frametype": "ui",
+      "summary": "JSM display/UI status family",
+      "id_parts": [
+        {
+          "mask": "0x00000F00",
+          "name": "module",
+          "shift": 8,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0xFFFFF0FF",
+      "id-result": "0x1C240000",
+      "key-mask": "0xFFFFF0FF",
+      "rnet_name": "RNetPowerDownJsm",
+      "frametype": "ui",
+      "summary": "PM requests JSM power down",
+      "id_parts": [
+        {
+          "mask": "0x00000F00",
+          "name": "module",
+          "shift": 8,
+          "endian": "l"
+        }
+      ]
+    },
+    {
+      "extended": true,
+      "remote": "data",
+      "Id-and-mask": "0x1FFFFF00",
+      "id-result": "0x0",
+      "key-mask": "0x1FFFFF00",
+      "rnet_name": "RNetGenericExtended00",
+      "frametype": "generic",
+      "summary": "generic editable extended family 0x000000xx",
+      "id_parts": [
+        {
+          "mask": "0x000000FF",
+          "name": "sub_id",
+          "endian": "l"
+        }
+      ],
+      "fields": [
+        {
+          "sig_name": "byte0",
+          "bit_mask": "0xFF",
+          "shift": 0
+        },
+        {
+          "sig_name": "byte1",
+          "bit_mask": "0xFF00",
+          "shift": 8
+        }
+      ]
+    }
+  ]
+}
