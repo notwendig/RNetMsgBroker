@@ -2,7 +2,13 @@
 
 ## Version
 
-0.2.1 — `fields[]` lesen zusätzlich `zyklu`/`zyklus`, `einheit`/`unit` und `descipt`/`description` als Feld-Metadaten.
+0.2.5 — Standard-Demo ohne Argumente gibt jetzt beide Varianten aus: Kurzform (`full=false`) und Vollform (`full=true`).
+
+0.2.4 — Test-App ergänzt `--both`, damit Kurzform (`full=false`) und Vollform (`full=true`) direkt nacheinander geprüft werden können.
+
+0.2.3 — `toString()` hat den optionalen Parameter `bool full=false`. Kurzform bleibt unverändert; `full=true` ergänzt Frame-/Feld-Metadaten wie `zyklus`, `frametype`, `descipt`, Masken und Daten.
+
+0.2.2 — `zyklu` wurde aus `fields[]` nach `frames[].zyklus` verschoben. `fields[]` lesen weiterhin `einheit`/`unit` und `descipt`/`description`; alte JSON-Dateien mit `fields[].zyklu` bleiben kompatibel.
 
 
 Eigenständige Qt-Core-Shared-Library zum Dekodieren von R-Net/CAN-Botschaften aus einer editierbaren `R-Net.json`.
@@ -16,7 +22,9 @@ Eigenständige Qt-Core-Shared-Library zum Dekodieren von R-Net/CAN-Botschaften a
 - `toString(CanMsg)` und `toString(canId, data, extended, remote)`
 - `RNetMsgBrokerTest` als kleine Konsolen-Test-App
 - `R-Net.json` mit bekannten R-Net-Frame-Familien aus dem QtRNetAnalyzer-Stand `chatgpt` plus editierbaren Beispielen
-- Feld-Metadaten `zyklu`/`zyklus`, `einheit`/`unit` und `descipt`/`description` werden eingelesen und intern mitgespeichert
+- Frame-Metadatum `zyklus` wird auf Definitionsebene gelesen
+- Feld-Metadaten `einheit`/`unit` und `descipt`/`description` werden eingelesen und intern mitgespeichert
+- alte Dateien mit `fields[].zyklu` oder `fields[].zyklus` bleiben lesbar
 
 ## Ausgabeformat
 
@@ -39,6 +47,7 @@ Normales gültiges JSON:
   "key-mask": "0xFFF0F",
   "rnet_name": "RnetMsg_xyz",
   "frametype": "example",
+  "zyklus": "20ms",
   "id_parts": [
     { "name": "Modul", "bit_mask": "0xf0", "shift": 4, "big_endien": false }
   ],
@@ -48,7 +57,6 @@ Normales gültiges JSON:
       "bit_mask": "0x00ff00",
       "shift": 8,
       "big_endien": false,
-      "zyklu": "20ms",
       "einheit": "",
       "descipt": "oberes Beispiel-Datenbyte"
     },
@@ -57,7 +65,6 @@ Normales gültiges JSON:
       "bit_mask": "0x0000ff",
       "shift": 0,
       "big_endien": false,
-      "zyklu": "20ms",
       "einheit": "",
       "descipt": "unteres Beispiel-Datenbyte"
     }
@@ -80,7 +87,9 @@ Dazu passend:
 - bare words wie `name:Modul`
 - `//`-Kommentare außerhalb von Strings
 - Schreibfehler `fieds` zusätzlich zu `fields`
-- bei `fields[]`: `zyklu` oder `zyklus`; `einheit` oder `unit`; `descipt`, `descript`, `description`, `desc` oder `beschreibung`
+- bei `frames[]`: `zyklus`, `zyklu`, `cycle`, `cyclus`, `period`, `intervall` oder `interval`
+- bei `fields[]`: `einheit` oder `unit`; `descipt`, `descript`, `description`, `desc` oder `beschreibung`
+- Kompatibilität: `fields[].zyklu` und `fields[].zyklus` werden noch gelesen, aber neue Dateien sollen `frames[].zyklus` verwenden
 
 `...` als Platzhalter ist weiterhin kein JSON-Inhalt und muss entfernt werden.
 
@@ -100,7 +109,7 @@ cmake --build build -j"$(nproc)"
 
 ## Test
 
-Automatische Beispiele:
+Automatische Beispiele, jetzt immer mit beiden Varianten `full=false` und `full=true`:
 
 ```bash
 ./build/RNetMsgBrokerTest
@@ -110,7 +119,9 @@ Ein einzelner Frame:
 
 ```bash
 ./build/RNetMsgBrokerTest --id 0x56710 --data 00aabb
-./build/RNetMsgBrokerTest --id 0x56760 --data 001234
+./build/RNetMsgBrokerTest --id 0x56710 --data 00aabb --full
+./build/RNetMsgBrokerTest --id 0x56710 --data 00aabb --both
+./build/RNetMsgBrokerTest --id 0x56760 --data 001234 --both
 ```
 
 Andere JSON-Datei:

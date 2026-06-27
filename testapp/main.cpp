@@ -85,12 +85,18 @@ int main(int argc, char *argv[])
                                       QStringLiteral("CAN-ID als Extended Frame auswerten"));
     QCommandLineOption remoteOption({QStringLiteral("r"), QStringLiteral("rtr")},
                                     QStringLiteral("Remote-Transmission-Request / RTR"));
+    QCommandLineOption fullOption({QStringLiteral("f"), QStringLiteral("full")},
+                                  QStringLiteral("Vollausgabe mit Frame-/Feld-Metadaten"));
+    QCommandLineOption bothOption({QStringLiteral("b"), QStringLiteral("both")},
+                                  QStringLiteral("Kurz- und Vollausgabe nacheinander testen"));
 
     parser.addOption(jsonOption);
     parser.addOption(idOption);
     parser.addOption(dataOption);
     parser.addOption(extendedOption);
     parser.addOption(remoteOption);
+    parser.addOption(fullOption);
+    parser.addOption(bothOption);
     parser.process(app);
 
     QString jsonFile = parser.value(jsonOption);
@@ -119,7 +125,14 @@ int main(int argc, char *argv[])
             qCritical().noquote() << QStringLiteral("ungueltige Payload-Daten: %1").arg(parser.value(dataOption));
             return 4;
         }
-        qInfo().noquote() << broker.toString(canId, data, parser.isSet(extendedOption), parser.isSet(remoteOption));
+        const bool extended = parser.isSet(extendedOption);
+        const bool remote = parser.isSet(remoteOption);
+        if (parser.isSet(bothOption)) {
+            qInfo().noquote() << QStringLiteral("kurz:") << broker.toString(canId, data, extended, remote, false);
+            qInfo().noquote() << QStringLiteral("voll:") << broker.toString(canId, data, extended, remote, true);
+        } else {
+            qInfo().noquote() << broker.toString(canId, data, extended, remote, parser.isSet(fullOption));
+        }
         return 0;
     }
 
@@ -133,8 +146,18 @@ int main(int argc, char *argv[])
         {0x123u, QByteArray::fromHex("01020304"), false, false},
     };
 
-    for (const RNetMsgBroker::CanMsg &sample : samples)
-        qInfo().noquote() << broker.toString(sample);
+    // Standard-Demo ohne --id soll beide toString-Varianten wirklich testen.
+    // --full alleine zeigt weiterhin nur Vollform; sonst werden kurz+voll ausgegeben.
+    const bool printBothInDemo = parser.isSet(bothOption) || !parser.isSet(fullOption);
+
+    for (const RNetMsgBroker::CanMsg &sample : samples) {
+        if (printBothInDemo) {
+            qInfo().noquote() << QStringLiteral("kurz:") << broker.toString(sample, false);
+            qInfo().noquote() << QStringLiteral("voll:") << broker.toString(sample, true);
+        } else {
+            qInfo().noquote() << broker.toString(sample, true);
+        }
+    }
 
     return 0;
 }

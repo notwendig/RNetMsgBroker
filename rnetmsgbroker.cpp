@@ -36,7 +36,7 @@ QString RNetMsgBroker::versionString()
 #ifdef RNETMSGBROKER_VERSION_STRING
     return QStringLiteral(RNETMSGBROKER_VERSION_STRING);
 #else
-    return QStringLiteral("0.2.1");
+    return QStringLiteral("0.2.4");
 #endif
 }
 
@@ -151,7 +151,7 @@ bool RNetMsgBroker::del(const QJsonObject &json, QString *errorString)
     return removed > 0;
 }
 
-QString RNetMsgBroker::toString(const CanMsg &msg) const
+QString RNetMsgBroker::toString(const CanMsg &msg, bool full) const
 {
     Definition best;
     bool found = false;
@@ -183,20 +183,22 @@ QString RNetMsgBroker::toString(const CanMsg &msg) const
             parts << QStringLiteral("RTR");
         if (!msg.data.isEmpty())
             parts << QStringLiteral("data=%1").arg(hexBytes(msg.data));
+        if (full)
+            parts << QStringLiteral("dlc=%1").arg(msg.data.size());
         return parts.join(QStringLiteral(" "));
     }
 
-    return render(best, msg);
+    return render(best, msg, full);
 }
 
-QString RNetMsgBroker::toString(quint32 canId, const QByteArray &data, bool extended, bool remote) const
+QString RNetMsgBroker::toString(quint32 canId, const QByteArray &data, bool extended, bool remote, bool full) const
 {
     CanMsg msg;
     msg.canId = canId;
     msg.data = data;
     msg.extended = extended;
     msg.remote = remote;
-    return toString(msg);
+    return toString(msg, full);
 }
 
 int RNetMsgBroker::count() const
@@ -272,6 +274,10 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
     stringByNames(json, {QStringLiteral("rnet_name"), QStringLiteral("rnet-name"), QStringLiteral("name")}, &definition->rnetName);
     stringByNames(json, {QStringLiteral("frametype"), QStringLiteral("frame-type"), QStringLiteral("frame_type"), QStringLiteral("type")}, &definition->frameType);
     stringByNames(json, {QStringLiteral("summary"), QStringLiteral("description"), QStringLiteral("desc")}, &definition->summary);
+    textByNames(json,
+                {QStringLiteral("zyklus"), QStringLiteral("zyklu"), QStringLiteral("cycle"),
+                 QStringLiteral("cyclus"), QStringLiteral("period"), QStringLiteral("intervall"), QStringLiteral("interval")},
+                &definition->cycle);
 
     if (definition->rnetName.isEmpty())
         definition->rnetName = QStringLiteral("RNet_%1_%2").arg(hex32(definition->idResult), hex32(definition->idAndMask));
@@ -373,10 +379,15 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
                         {QStringLiteral("big_endian"), QStringLiteral("big-endian"), QStringLiteral("big_endien"), QStringLiteral("big-endien")},
                         &field.bigEndian);
             boolByNames(item, {QStringLiteral("signed"), QStringLiteral("is_signed")}, &field.isSigned);
+            // Ab v0.2.2 gehoert der Zyklus zur Frame-Definition (frames[].zyklus).
+            // Alte JSON-Dateien mit fields[].zyklu/zyklus bleiben lesbar; falls dort nichts
+            // steht, erbt das Feld den Frame-Zyklus als interne Metainformation.
             textByNames(item,
                         {QStringLiteral("zyklu"), QStringLiteral("zyklus"), QStringLiteral("cycle"),
                          QStringLiteral("cyclus"), QStringLiteral("period"), QStringLiteral("intervall"), QStringLiteral("interval")},
                         &field.cycle);
+            if (field.cycle.isEmpty())
+                field.cycle = definition->cycle;
             textByNames(item, {QStringLiteral("einheit"), QStringLiteral("unit"), QStringLiteral("units")}, &field.unit);
             textByNames(item,
                         {QStringLiteral("descipt"), QStringLiteral("descript"), QStringLiteral("description"),
@@ -444,7 +455,7 @@ bool RNetMsgBroker::matches(const Definition &definition, const CanMsg &msg) con
     return true;
 }
 
-QString RNetMsgBroker::render(const Definition &definition, const CanMsg &msg) const
+QString RNetMsgBroker::render(const Definition &definition, const CanMsg &msg, bool full) const
 {
     QStringList idPartTexts;
     for (const IdPart &part : definition.idParts) {
@@ -490,7 +501,26 @@ QString RNetMsgBroker::render(const Definition &definition, const CanMsg &msg) c
         }
         if (!field.unit.isEmpty())
             renderedValue += field.unit;
-        fieldTexts << QStringLiteral("%1=%2").arg(field.name, renderedValue);
+
+        QString fieldText = QStringLiteral("%1=%2").arg(field.name, renderedValue);
+        if (full) {
+            QStringList meta;
+            if (!field.description.isEmpty())
+                meta << QStringLiteral("desc=%1").arg(field.description);
+            if (!field.cycle.isEmpty() && field.cycle != definition.cycle)
+                meta << QStringLiteral("zyklus=%1").arg(field.cycle);
+            if (field.source != QStringLiteral("data"))
+                meta << QStringLiteral("source=%1").arg(field.source);
+            if (field.hasByteWindow)
+                meta << QStringLiteral("byte=%1 width=%2").arg(field.offset).arg(field.width);
+            else
+                meta << QStringLiteral("mask=%1 shift=%2").arg(hex64(field.bitMask)).arg(field.shift);
+            if (!field.unit.isEmpty())
+                meta << QStringLiteral("einheit=%1").arg(field.unit);
+            if (!meta.isEmpty())
+                fieldText += QStringLiteral(" [%1]").arg(meta.join(QStringLiteral(", ")));
+        }
+        fieldTexts << fieldText;
     }
 
     QString head = definition.rnetName;
@@ -501,6 +531,24 @@ QString RNetMsgBroker::render(const Definition &definition, const CanMsg &msg) c
     if (msg.remote)
         tail << QStringLiteral("RTR");
     tail.append(fieldTexts);
+
+    if (full) {
+        QStringList frameMeta;
+        if (!definition.frameType.isEmpty())
+            frameMeta << QStringLiteral("typ=%1").arg(definition.frameType);
+        if (!definition.cycle.isEmpty())
+            frameMeta << QStringLiteral("zyklus=%1").arg(definition.cycle);
+        if (!definition.summary.isEmpty())
+            frameMeta << QStringLiteral("desc=%1").arg(definition.summary);
+        frameMeta << QStringLiteral("id=%1").arg(hex32(msg.canId));
+        frameMeta << QStringLiteral("mask=%1").arg(hex32(definition.idAndMask));
+        frameMeta << QStringLiteral("result=%1").arg(hex32(definition.idResult));
+        frameMeta << QStringLiteral("%1").arg(msg.extended ? QStringLiteral("EXT") : QStringLiteral("STD"));
+        if (!msg.data.isEmpty())
+            frameMeta << QStringLiteral("data=%1").arg(hexBytes(msg.data));
+        if (!frameMeta.isEmpty())
+            tail << QStringLiteral("{%1}").arg(frameMeta.join(QStringLiteral(", ")));
+    }
 
     if (tail.isEmpty()) {
         if (!definition.summary.isEmpty())

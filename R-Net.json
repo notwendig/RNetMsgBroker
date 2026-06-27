@@ -1,6 +1,6 @@
 {
   "$schema": "RNetMsgBroker/1",
-  "description": "Editierbare R-Net Frame-Definitionen fuer RNetMsgBroker. Zahlen koennen als JSON-Zahl oder als String wie 0x1F000000 angegeben werden. fields[] koennen zyklu/zyklus, einheit/unit und descipt/description enthalten.",
+  "description": "Editierbare R-Net Frame-Definitionen fuer RNetMsgBroker. Zahlen koennen als JSON-Zahl oder als String wie 0x1F000000 angegeben werden. frames[] koennen zyklus/cycle enthalten; fields[] koennen einheit/unit und descipt/description enthalten.",
   "frames": [
     {
       "extended": false,
@@ -10,6 +10,7 @@
       "key-mask": "0xFFF0F",
       "rnet_name": "RnetMsg_xyz",
       "frametype": "example",
+      "zyklus": "20ms",
       "summary": "Beispiel: Modul kommt aus der CAN-ID, Felder aus den Daten nach #.",
       "id_parts": [
         {
@@ -25,7 +26,6 @@
           "bit_mask": "0x00ff00",
           "shift": 8,
           "big_endien": false,
-          "zyklu": "20ms",
           "einheit": "",
           "descipt": "oberes Beispiel-Datenbyte"
         },
@@ -34,7 +34,6 @@
           "bit_mask": "0x0000ff",
           "shift": 0,
           "big_endien": false,
-          "zyklu": "20ms",
           "einheit": "",
           "descipt": "unteres Beispiel-Datenbyte"
         }

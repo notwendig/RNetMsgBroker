@@ -34,8 +34,8 @@ public:
     bool add(const QJsonDocument &json, QString *errorString = nullptr);
     bool del(const QJsonObject &json, QString *errorString = nullptr);
 
-    QString toString(const CanMsg &msg) const;
-    QString toString(quint32 canId, const QByteArray &data, bool extended = false, bool remote = false) const;
+    QString toString(const CanMsg &msg, bool full = false) const;
+    QString toString(quint32 canId, const QByteArray &data, bool extended = false, bool remote = false, bool full = false) const;
 
     static QString versionString();
 
@@ -69,7 +69,7 @@ private:
         bool bigEndian = false;
         bool isSigned = false;
         bool hasByteWindow = false;
-        QString cycle;       // z.B. "20ms" oder "bei Änderung"
+        QString cycle;       // Alt-JSON: fields[].zyklu/zyklus; neu bevorzugt: Definition::cycle
         QString unit;        // JSON: unit/einheit
         QString description; // JSON: descipt/descript/description/desc/beschreibung
     };
@@ -92,6 +92,7 @@ private:
         QString rnetName;
         QString frameType;
         QString summary;
+        QString cycle; // JSON: frames[].zyklus, z.B. "20ms" oder "bei Änderung"
         int extended = -1; // -1 = any, 0 = standard, 1 = extended
         int remote = -1;   // -1 = any, 0 = data, 1 = RTR
         QList<IdPart> idParts;
@@ -105,7 +106,7 @@ private:
     bool addObjectToMap(const QJsonObject &json, DefinitionMap *target, QString *errorString) const;
     bool parseDefinition(const QJsonObject &json, Definition *definition, QString *errorString) const;
     bool matches(const Definition &definition, const CanMsg &msg) const;
-    QString render(const Definition &definition, const CanMsg &msg) const;
+    QString render(const Definition &definition, const CanMsg &msg, bool full) const;
 
     static QString hex32(quint32 value);
     static QString hex64(quint64 value);
