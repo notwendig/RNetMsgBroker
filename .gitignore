@@ -22,6 +22,7 @@ core
 tags
 .DS_Store
 .directory
+.qtcreator
 *.debug
 Makefile*
 *.prl
@@ -82,3 +83,11 @@ CMakeLists.txt.user*
 .uic/
 /build*/
 /.qtcreator/
+
+# Generated analysis output
+*.csv
+*.out
+*.log
+
+# Keep bundled small examples tracked even if suffix would match later rules
+!testdata/*.txt

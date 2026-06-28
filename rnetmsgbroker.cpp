@@ -1,3 +1,13 @@
+// SPDX-License-Identifier: LicenseRef-ProjectOwner
+//
+// RNetMsgBroker core implementation.
+//
+// The broker loads editable R-Net/CAN frame definitions from R-Net.json,
+// matches incoming CAN frames against ID/data masks, and renders a compact
+// or metadata-rich text representation. The JSON reader is intentionally
+// tolerant because the frame catalogue is also used as a working reverse-
+// engineering notebook.
+
 #include "rnetmsgbroker.h"
 
 #include <QFile>
@@ -36,10 +46,12 @@ QString RNetMsgBroker::versionString()
 #ifdef RNETMSGBROKER_VERSION_STRING
     return QStringLiteral(RNETMSGBROKER_VERSION_STRING);
 #else
-    return QStringLiteral("0.2.4");
+    return QStringLiteral("0.2.13");
 #endif
 }
 
+// Load a complete frame catalogue. Parsing is transactional: the existing
+// catalogue is replaced only after every definition was parsed successfully.
 bool RNetMsgBroker::readJson(const QString &jsonFilename, QString *errorString)
 {
     QFile file(jsonFilename);
@@ -151,6 +163,9 @@ bool RNetMsgBroker::del(const QJsonObject &json, QString *errorString)
     return removed > 0;
 }
 
+// Decode one CAN message. If multiple definitions match, the most specific
+// one wins: more ID bits, explicit STD/EXT/RTR flags and data masks score
+// higher than generic families.
 QString RNetMsgBroker::toString(const CanMsg &msg, bool full) const
 {
     Definition best;
@@ -163,8 +178,12 @@ QString RNetMsgBroker::toString(const CanMsg &msg, bool full) const
             continue;
 
         int score = popCount32(definition.idAndMask);
+        if (definition.extended != AnyFlag)
+            score += 4;
+        if (definition.remote != AnyFlag)
+            score += 8;
         if (definition.dataMatcher.enabled)
-            score += 64;
+            score += 64 + popCount64(definition.dataMatcher.mask);
         score += definition.fields.size();
 
         if (!found || score > bestScore) {
@@ -273,6 +292,9 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
 
     stringByNames(json, {QStringLiteral("rnet_name"), QStringLiteral("rnet-name"), QStringLiteral("name")}, &definition->rnetName);
     stringByNames(json, {QStringLiteral("frametype"), QStringLiteral("frame-type"), QStringLiteral("frame_type"), QStringLiteral("type")}, &definition->frameType);
+    textByNames(json, {QStringLiteral("phase"), QStringLiteral("pfase"), QStringLiteral("startup_phase"), QStringLiteral("startup-phase")}, &definition->phase);
+    textByNames(json, {QStringLiteral("quelle"), QStringLiteral("src")}, &definition->source);
+    textByNames(json, {QStringLiteral("senke"), QStringLiteral("sink"), QStringLiteral("dst"), QStringLiteral("destination"), QStringLiteral("target")}, &definition->sink);
     stringByNames(json, {QStringLiteral("summary"), QStringLiteral("description"), QStringLiteral("desc")}, &definition->summary);
     textByNames(json,
                 {QStringLiteral("zyklus"), QStringLiteral("zyklu"), QStringLiteral("cycle"),
@@ -434,6 +456,8 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
     return true;
 }
 
+// Return true when ID/mask, frame format, RTR flag and optional payload
+// matcher agree with the incoming frame.
 bool RNetMsgBroker::matches(const Definition &definition, const CanMsg &msg) const
 {
     if (definition.extended != AnyFlag && (msg.extended ? TrueFlag : FalseFlag) != definition.extended)
@@ -444,6 +468,13 @@ bool RNetMsgBroker::matches(const Definition &definition, const CanMsg &msg) con
         return false;
 
     if (definition.dataMatcher.enabled) {
+        // Wenn ein JSON-Datenmuster eine width angibt, muss die Payload auch
+        // mindestens so lang sein. Sonst wuerden z.B. leere Frames faelschlich
+        // ein Muster 00000000 treffen.
+        if (definition.dataMatcher.width > 0 &&
+            msg.data.size() < definition.dataMatcher.offset + definition.dataMatcher.width)
+            return false;
+
         const quint64 value = bytesToInteger(msg.data,
                                              definition.dataMatcher.offset,
                                              definition.dataMatcher.width,
@@ -455,6 +486,8 @@ bool RNetMsgBroker::matches(const Definition &definition, const CanMsg &msg) con
     return true;
 }
 
+// Render the selected definition. Short mode is stable for logs; full mode
+// appends phase/source/sink/cycle and raw matching metadata.
 QString RNetMsgBroker::render(const Definition &definition, const CanMsg &msg, bool full) const
 {
     QStringList idPartTexts;
@@ -536,6 +569,12 @@ QString RNetMsgBroker::render(const Definition &definition, const CanMsg &msg, b
         QStringList frameMeta;
         if (!definition.frameType.isEmpty())
             frameMeta << QStringLiteral("typ=%1").arg(definition.frameType);
+        if (!definition.phase.isEmpty())
+            frameMeta << QStringLiteral("phase=%1").arg(definition.phase);
+        if (!definition.source.isEmpty())
+            frameMeta << QStringLiteral("quelle=%1").arg(definition.source);
+        if (!definition.sink.isEmpty())
+            frameMeta << QStringLiteral("senke=%1").arg(definition.sink);
         if (!definition.cycle.isEmpty())
             frameMeta << QStringLiteral("zyklus=%1").arg(definition.cycle);
         if (!definition.summary.isEmpty())
@@ -734,6 +773,16 @@ int RNetMsgBroker::popCount32(quint32 value)
     return count;
 }
 
+int RNetMsgBroker::popCount64(quint64 value)
+{
+    int count = 0;
+    while (value) {
+        value &= value - 1;
+        ++count;
+    }
+    return count;
+}
+
 RNetMsgBroker::Endian RNetMsgBroker::endianFromJson(const QJsonObject &object, Endian fallback)
 {
     QString text;
@@ -782,6 +831,8 @@ qint64 RNetMsgBroker::signExtend(quint64 value, int bitCount)
     return static_cast<qint64>(value);
 }
 
+// Convert common hand-written catalogue notation into strict JSON without
+// changing already-valid JSON. This is deliberately conservative.
 QByteArray RNetMsgBroker::relaxedJsonToStrict(const QByteArray &data)
 {
     QString text = QString::fromUtf8(data);

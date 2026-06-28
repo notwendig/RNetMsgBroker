@@ -1,27 +1,7 @@
-0.2.5
+0.2.13
 
-- Test-App: Standard-Demo ohne Argumente gibt jetzt beide Varianten aus
-- Automatische Beispiele zeigen Kurzform full=false und Vollform full=true direkt nacheinander
-- Option --both bleibt für Einzeltests erhalten
-- API bleibt unverändert gegenüber 0.2.4
-
-0.2.4
-
-- Test-App: Option --both ergänzt
-- --both gibt Kurzform full=false und Vollform full=true direkt nacheinander aus
-- API bleibt unverändert gegenüber 0.2.3
-
-0.2.3
-
-- toString(const CanMsg&, bool full=false) ergänzt
-- toString(canId, data, extended, remote, bool full=false) ergänzt
-- full=false bleibt abwärtskompatible Kurzform
-- full=true gibt zusätzlich Frame-/Feld-Metadaten aus: typ, zyklus, desc, id, mask, result, data und Feldmasken
-
-0.2.2
-
-Änderung:
-- zyklu wurde aus fields[] nach frames[].zyklus verschoben
-- fields[] behalten einheit/unit und descipt/description
-- alte JSON-Dateien mit fields[].zyklu oder fields[].zyklus bleiben lesbar
-- Beispiel: 0x56710#00aabb -> RnetMsg_xyz (Modul=1); field_1=0xaa; field_2=0xbb
+- GitHub-Pflegedateien ergänzt: CHANGELOG, AUTHORS, CONTRIBUTING, SECURITY, Pull-Request-Template und Issue-Template.
+- Skripte ergänzt: build.sh, check.sh, candump_to_csv.sh, list_unknown_observed.py.
+- Doku ergänzt: CSV_FORMAT, RNET_JSON_SCHEMA, STARTUP_SEQUENCE, UNKNOWN_FRAMES.
+- Öffentliche Header und zentrale Parser-/CSV-Funktionen kommentiert.
+- Optionales CMake-install target ergänzt.

@@ -2,6 +2,20 @@
 
 ## Version
 
+0.2.13 — GitHub-Pflegestand: Skripte, Doku, CONTRIBUTING/SECURITY/Issue-Templates und zusätzliche Kommentare ergänzt.
+
+0.2.12 — CSV-Spaltenüberschrift präzisiert: die letzte Spalte heißt jetzt `ausgabe`.
+0.2.11 — Test-App: `--out`/`-o` schreibt jetzt Semikolon-CSV mit Spalten `phase`, `quelle`, `senke`, `typ` und korrekt gequoteter Dekodierausgabe.
+
+0.2.10 — `R-Net.json` um Frame-Metadaten `phase`, `quelle`, `senke` ergänzt. Serial-Exchange-Sequenzen haben getrennte `data`/`rtr`-Definitionen, damit Quelle/Senke stimmt. Der Broker liest zusätzlich die Aliasnamen `pfase`, `src` und `sink`/`dst`/`destination`/`target`; `--full` gibt die neuen Metadaten mit aus.
+
+0.2.9 — Test-App: Option `--out <file>` / `-o <file>` ergänzt; normale Ausgabe kann nun direkt in eine Datei geschrieben werden.
+0.2.8 — Diagnose candump.txt: 7-Byte-JSM-Heartbeat 03C30F0F ergänzt; beobachtete 0C1803xx- und 1E84..1E87-RTR-Familien als Teildefinitionen ergänzt.
+
+0.2.7 — `R-Net.json` um Frame-Familien aus `redragonx/open-rnet/reference/RNET_FRAME_DICTIONARY.md` erweitert. Bei mehreren Treffern gewinnt das spezifischere Datenmuster.
+
+0.2.6 — Test-App liest mit `--candump` oder `-d` candump-Dateien. `--full` schaltet dabei die Vollausgabe ein. Kurzoption `-d` ist jetzt candump; Einzelpayload bleibt `--data`.
+
 0.2.5 — Standard-Demo ohne Argumente gibt jetzt beide Varianten aus: Kurzform (`full=false`) und Vollform (`full=true`).
 
 0.2.4 — Test-App ergänzt `--both`, damit Kurzform (`full=false`) und Vollform (`full=true`) direkt nacheinander geprüft werden können.
@@ -21,8 +35,8 @@ Eigenständige Qt-Core-Shared-Library zum Dekodieren von R-Net/CAN-Botschaften a
 - `add(json)` und `del(json)` für Runtime-Erweiterung/-Löschung
 - `toString(CanMsg)` und `toString(canId, data, extended, remote)`
 - `RNetMsgBrokerTest` als kleine Konsolen-Test-App
-- `R-Net.json` mit bekannten R-Net-Frame-Familien aus dem QtRNetAnalyzer-Stand `chatgpt` plus editierbaren Beispielen
-- Frame-Metadatum `zyklus` wird auf Definitionsebene gelesen
+- `R-Net.json` mit bekannten R-Net-Frame-Familien aus dem QtRNetAnalyzer-Stand `chatgpt`, editierbaren Beispielen und ergänzten Definitionen aus `redragonx/open-rnet/reference/RNET_FRAME_DICTIONARY.md`
+- Frame-Metadaten `phase`, `quelle`, `senke` und `zyklus` werden auf Definitionsebene gelesen
 - Feld-Metadaten `einheit`/`unit` und `descipt`/`description` werden eingelesen und intern mitgespeichert
 - alte Dateien mit `fields[].zyklu` oder `fields[].zyklus` bleiben lesbar
 
@@ -47,6 +61,9 @@ Normales gültiges JSON:
   "key-mask": "0xFFF0F",
   "rnet_name": "RnetMsg_xyz",
   "frametype": "example",
+  "phase": "test.example",
+  "quelle": "test",
+  "senke": "test",
   "zyklus": "20ms",
   "id_parts": [
     { "name": "Modul", "bit_mask": "0xf0", "shift": 4, "big_endien": false }
@@ -87,11 +104,34 @@ Dazu passend:
 - bare words wie `name:Modul`
 - `//`-Kommentare außerhalb von Strings
 - Schreibfehler `fieds` zusätzlich zu `fields`
-- bei `frames[]`: `zyklus`, `zyklu`, `cycle`, `cyclus`, `period`, `intervall` oder `interval`
+- bei `frames[]`: `phase` oder `pfase`; `quelle` oder `src`; `senke`, `sink`, `dst`, `destination` oder `target`; außerdem `zyklus`, `zyklu`, `cycle`, `cyclus`, `period`, `intervall` oder `interval`
 - bei `fields[]`: `einheit` oder `unit`; `descipt`, `descript`, `description`, `desc` oder `beschreibung`
 - Kompatibilität: `fields[].zyklu` und `fields[].zyklus` werden noch gelesen, aber neue Dateien sollen `frames[].zyklus` verwenden
 
 `...` als Platzhalter ist weiterhin kein JSON-Inhalt und muss entfernt werden.
+
+Bei `--full` erscheinen die neuen Frame-Metadaten in der Abschlussklammer, z. B.:
+
+```text
+RNetJsmSerialHeartbeat; serial32=0xfc801ecd; serial_tail=0x0; {typ=serial, phase=startup.serial_auth, quelle=jsm, senke=pm, id=0x0000000e, mask=0x000007ff, result=0x0000000e, STD, data=FC 80 1E CD 00 00 00 00}
+```
+
+
+## GitHub-Pflege
+
+Für einen sauberen Repository-Stand sind zusätzlich enthalten:
+
+- `CHANGELOG.md` mit Versionshistorie
+- `AUTHORS.md` mit Projekt-/Quellenhinweisen
+- `CONTRIBUTING.md` für Änderungen an Code und `R-Net.json`
+- `SECURITY.md` mit Sicherheitshinweisen für Rollstuhl-/CAN-Arbeiten
+- `.github/workflows/cmake.yml` für einen CMake/Qt6-CI-Build
+- `.github/ISSUE_TEMPLATE/bug_report.yml` und `.github/pull_request_template.md`
+- `scripts/build.sh`, `scripts/check.sh`, `scripts/candump_to_csv.sh`
+- `scripts/list_unknown_observed.py` zum Auffinden fachlich noch unbekannter Frames in CSV-Dateien
+- `docs/CSV_FORMAT.md`, `docs/RNET_JSON_SCHEMA.md`, `docs/STARTUP_SEQUENCE.md`, `docs/UNKNOWN_FRAMES.md`
+
+Die Lizenz ist bewusst **nicht automatisch festgelegt**. Vor öffentlicher Veröffentlichung bitte eine passende `LICENSE` ergänzen.
 
 ## Build
 
@@ -122,6 +162,34 @@ Ein einzelner Frame:
 ./build/RNetMsgBrokerTest --id 0x56710 --data 00aabb --full
 ./build/RNetMsgBrokerTest --id 0x56710 --data 00aabb --both
 ./build/RNetMsgBrokerTest --id 0x56760 --data 001234 --both
+```
+
+Candump-Datei lesen:
+
+```bash
+./build/RNetMsgBrokerTest --candump candump.txt
+./build/RNetMsgBrokerTest -d candump.txt
+./build/RNetMsgBrokerTest -d candump.txt --full
+./build/RNetMsgBrokerTest -d candump.txt --full --out result.csv
+./build/RNetMsgBrokerTest -d candump.txt --full -o result.csv
+./build/RNetMsgBrokerTest -d testdata/candump_sample.txt --full
+```
+
+
+Bei `--out`/`-o` wird Semikolon-CSV geschrieben:
+
+```text
+zeile;zeit;interface;can_id;format;rtr;dlc;data;name;typ;phase;quelle;senke;ausgabe
+```
+
+Die Spalte `ausgabe` ist CSV-gequotet, wenn sie selbst Semikolons enthält. Ohne `--out` bleibt die bisherige lesbare Textausgabe erhalten.
+
+Unterstütztes candump-Format, z. B.:
+
+```text
+(1622641700.696733) can0 00C#
+(1622641700.717310) can0 00E#FC801ECD00000000
+(1622641700.717674) can0 7B3#
 ```
 
 Andere JSON-Datei:
