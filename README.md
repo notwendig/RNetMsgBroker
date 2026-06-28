@@ -2,7 +2,13 @@
 
 ## Version
 
-0.2.15 — CMake-Build-Target `deliver` ergänzt. Das Ziel erzeugt ein versioniertes ZIP `RNetMsgBroker_v<version>.zip` ohne Build-/Git-/Ausgabedateien.
+1.0.0 — Erste stabile GitHub-Release-Version. Enthält strikt gültige `R-Net.json`, Semikolon-CSV, robuste Versionsausgabe, `deliver`-Target und GitHub-CI.
+
+0.2.17 — Versionsoptionen robust gemacht: `--version` und `--libversion` werden vor dem Qt-CommandLineParser abgefangen. Das Smoke-Test-Sample enthält keine absichtlichen Decoder-UNKNOWNs mehr.
+
+0.2.16 — Lib-Version wird sichtbar ausgegeben: `--version`, `--libversion` und `libversion:` in der normalen Textausgabe. Alle Markdown-/Doc-Dateien wurden auf den aktuellen Stand gebracht.
+
+0.2.15 — CMake-Target `deliver` ergänzt; erzeugt ein versioniertes Quellen-ZIP direkt aus dem Build-System.
 
 0.2.14 — `R-Net.json` und Dokumentation auf korrekt geschriebene, strikt gültige JSON-Schlüssel bereinigt. Tippfehler-Aliase werden nicht mehr dokumentiert und nicht mehr als Parser-Aliase akzeptiert.
 
@@ -21,38 +27,10 @@ Eigenständige Qt-Core-Shared-Library zum Dekodieren von R-Net/CAN-Botschaften a
 - `add(json)` und `del(json)` für Runtime-Erweiterung/-Löschung
 - `toString(CanMsg)` und `toString(canId, data, extended, remote)`
 - `RNetMsgBrokerTest` als Konsolen-Test-App
+- Versionsausgabe über `--version`, `--libversion` und `RNetMsgBroker::versionString()`
 - `R-Net.json` mit bekannten R-Net-Frame-Familien
 - Frame-Metadaten `phase`, `quelle`, `senke` und `zyklus`
 - Feld-Metadaten `unit`/`einheit` und `description`
-
-## Build und Lieferung
-
-Normaler Build:
-
-```bash
-./scripts/build.sh
-```
-
-GitHub-/Release-ZIP erzeugen:
-
-```bash
-./scripts/deliver.sh
-```
-
-Oder direkt über CMake:
-
-```bash
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build --target deliver
-```
-
-Das Ziel `deliver` erzeugt im Build-Verzeichnis:
-
-```text
-build/RNetMsgBroker_v0.2.15.zip
-```
-
-Das Archiv enthält nur Projektquellen, Dokumentation, Skripte, Testdaten und GitHub-Dateien. Build-Verzeichnisse, `.git`, CSV-/OUT-/LOG-Dateien und CMake-Zwischendateien werden ausgeschlossen.
 
 ## Ausgabeformat
 
@@ -117,6 +95,29 @@ Bei `--full` erscheinen die Frame-Metadaten in der Abschlussklammer, z. B.:
 RNetJsmSerialHeartbeat; serial32=0xfc801ecd; serial_tail=0x0; {typ=serial, phase=startup.serial_auth, quelle=jsm, senke=pm, id=0x0000000e, mask=0x000007ff, result=0x0000000e, STD, data=FC 80 1E CD 00 00 00 00}
 ```
 
+
+## Versionsausgabe
+
+```bash
+./build/RNetMsgBrokerTest --version
+./build/RNetMsgBrokerTest --libversion
+```
+
+`--version` wird vor dem Qt-CommandLineParser abgefangen und gibt die Test-App-/Library-Version aus. `--libversion` gibt nur die reine Library-Version aus, z. B.:
+
+```text
+1.0.0
+```
+
+Bei normaler Textausgabe ohne `--out` steht die Library-Version zusätzlich in der ersten Ausgabezeile:
+
+```text
+libversion: 1.0.0
+geladen: 187 Definitionen aus ...
+```
+
+Bei `--out/-o` bleibt die Datei reine Semikolon-CSV; Versions- und Ladehinweise gehen nur ins Log.
+
 ## CSV-Ausgabe
 
 ```bash
@@ -142,9 +143,23 @@ cmake -S . -B build -G Ninja
 cmake --build build -j"$(nproc)"
 ```
 
+## Deliver-ZIP erstellen
+
+Das CMake-Target `deliver` erzeugt ein versioniertes Quellen-ZIP im Build-Verzeichnis:
+
+```bash
+cmake -S . -B build -G Ninja
+cmake --build build --target deliver
+ls -l build/RNetMsgBroker_v*.zip
+```
+
+Das Archiv enthält die Projektdateien für Weitergabe/GitHub, aber keine Build-Artefakte und kein `.git`-Verzeichnis.
+
 ## Test
 
 ```bash
+./build/RNetMsgBrokerTest --version
+./build/RNetMsgBrokerTest --libversion
 ./build/RNetMsgBrokerTest --both
 ./build/RNetMsgBrokerTest -d ./testdata/candump_sample.txt --full -o ./testdata/candump_sample.csv
 ./scripts/check.sh

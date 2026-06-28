@@ -16,3 +16,7 @@ Ein Teil der Definitionen wurde aus öffentlich dokumentierten open-rnet-Informa
 ## Hinweis
 
 R-Net ist ein sicherheitskritisches Rollstuhl-Steuerungssystem. Die Namen und Bedeutungen einzelner Frames können unvollständig oder vorläufig sein. Frames mit `phase=unknown.observed` sind absichtlich als beobachtet, aber fachlich noch nicht sicher verstanden markiert.
+
+## Versioning
+
+Die in Fehlerberichten und Releases genutzte Version stammt aus `RNetMsgBroker::versionString()` und kann mit `RNetMsgBrokerTest --libversion` abgefragt werden.

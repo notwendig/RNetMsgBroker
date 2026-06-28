@@ -31,3 +31,11 @@ Or with awk:
 ```bash
 awk -F';' 'NR>1 && $11=="unknown.observed" {print}' testdata/candump.csv
 ```
+
+## Reproducibility
+
+Für Fehlerberichte bitte zusätzlich die Library-Version angeben:
+
+```bash
+RNetMsgBrokerTest --libversion
+```

@@ -1,6 +1,6 @@
 {
   "$schema": "RNetMsgBroker/1",
-  "description": "R-Net frame definitions for RNetMsgBroker. v0.2.15 adds a CMake deliver target for versioned ZIP packaging.",
+  "description": "R-Net frame definitions for RNetMsgBroker. v1.0.0 stable release: strict JSON keys, CSV export, version diagnostics and deliver target.",
   "frames": [
     {
       "extended": false,

@@ -3,6 +3,7 @@
 // Command-line test and conversion tool for RNetMsgBroker.
 //
 // Typical use:
+//   RNetMsgBrokerTest --libversion
 //   RNetMsgBrokerTest -d candump.txt --full -o candump.csv
 // The `--out` path always writes semicolon separated CSV so the result can
 // be opened directly in LibreOffice/Calc with German locale defaults.
@@ -19,6 +20,8 @@
 #include <QRegularExpression>
 #include <QStringList>
 #include <QTextStream>
+
+#include <cstdio>
 
 // Parse CAN IDs passed on the command line. Values with A-F or 0x are hex;
 // purely decimal values stay decimal to keep manual tests ergonomic.
@@ -371,9 +374,34 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral("RNetMsgBrokerTest"));
     QCoreApplication::setApplicationVersion(RNetMsgBroker::versionString());
 
+    // Handle version switches before QCommandLineParser processes the
+    // command line.  This makes the two diagnostic switches robust even with
+    // older Qt builds or stale parser configuration in local build trees.
+    for (int i = 1; i < argc; ++i) {
+        const QString arg = QString::fromLocal8Bit(argv[i]);
+        if (arg == QStringLiteral("--libversion")) {
+            QTextStream versionOut(stdout);
+            versionOut << RNetMsgBroker::versionString() << '\n';
+            versionOut.flush();
+            return 0;
+        }
+        if (arg == QStringLiteral("--version")) {
+            QTextStream versionOut(stdout);
+            versionOut << QCoreApplication::applicationName()
+                       << QLatin1Char(' ')
+                       << RNetMsgBroker::versionString() << '\n';
+            versionOut.flush();
+            return 0;
+        }
+    }
+
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("Kleine Test-App fuer RNetMsgBroker"));
     parser.addHelpOption();
+    parser.addVersionOption();
+
+    QCommandLineOption libVersionOption(QStringLiteral("libversion"),
+                                        QStringLiteral("Nur RNetMsgBroker-Library-Version ausgeben"));
 
     QCommandLineOption jsonOption({QStringLiteral("j"), QStringLiteral("json")},
                                   QStringLiteral("R-Net JSON-Datei"),
@@ -399,6 +427,7 @@ int main(int argc, char *argv[])
     QCommandLineOption bothOption({QStringLiteral("b"), QStringLiteral("both")},
                                   QStringLiteral("Kurz- und Vollausgabe nacheinander testen"));
 
+    parser.addOption(libVersionOption);
     parser.addOption(jsonOption);
     parser.addOption(candumpOption);
     parser.addOption(outOption);
@@ -409,6 +438,13 @@ int main(int argc, char *argv[])
     parser.addOption(fullOption);
     parser.addOption(bothOption);
     parser.process(app);
+
+    if (parser.isSet(libVersionOption)) {
+        QTextStream versionOut(stdout);
+        versionOut << RNetMsgBroker::versionString() << '\n';
+        versionOut.flush();
+        return 0;
+    }
 
     QString jsonFile = parser.value(jsonOption);
     if (jsonFile.isEmpty()) {
@@ -444,10 +480,13 @@ int main(int argc, char *argv[])
     }
 
     const bool csvOutput = parser.isSet(outOption);
-    if (!csvOutput)
+    if (!csvOutput) {
+        *out << QStringLiteral("libversion: %1").arg(RNetMsgBroker::versionString()) << '\n';
         *out << QStringLiteral("geladen: %1 Definitionen aus %2").arg(broker.count()).arg(jsonFile) << '\n';
-    else
+    } else {
+        qInfo().noquote() << QStringLiteral("libversion: %1").arg(RNetMsgBroker::versionString());
         qInfo().noquote() << QStringLiteral("geladen: %1 Definitionen aus %2").arg(broker.count()).arg(jsonFile);
+    }
 
     int rc = 0;
 

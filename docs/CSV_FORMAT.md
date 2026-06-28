@@ -34,3 +34,13 @@ Beim Öffnen:
 - Zeichensatz: UTF-8
 - Trennoption: Semikolon
 - Texttrenner: `"`
+## Version/log output
+
+CSV-Dateien bleiben reine CSV-Dateien. Bei `--out/-o` werden `libversion:` und `geladen:` nicht in die Datei geschrieben, sondern nur als Logausgabe gemeldet.
+
+Die reine Library-Version kann separat abgefragt werden:
+
+```bash
+RNetMsgBrokerTest --libversion
+```
+

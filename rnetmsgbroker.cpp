@@ -44,7 +44,7 @@ QString RNetMsgBroker::versionString()
 #ifdef RNETMSGBROKER_VERSION_STRING
     return QStringLiteral(RNETMSGBROKER_VERSION_STRING);
 #else
-    return QStringLiteral("0.2.15");
+    return QStringLiteral("1.0.0");
 #endif
 }
 

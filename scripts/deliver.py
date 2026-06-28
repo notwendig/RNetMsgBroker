@@ -101,7 +101,7 @@ def validate_project(source_dir: Path, version: str) -> None:
 
     cmake_text = cmake_file.read_text(encoding="utf-8")
     if f"project(RNetMsgBroker VERSION {version} " not in cmake_text:
-        raise SystemExit("CMakeLists.txt enthält nicht die erwartete Projektversion")
+        raise SystemExit("CMakeLists.txt does not contain the expected project version")
 
     with rnet_json.open("r", encoding="utf-8") as fh:
         json.load(fh)
@@ -188,7 +188,7 @@ def main(argv: list[str]) -> int:
     output = args.output.resolve()
     validate_project(source_dir, args.version)
     count = create_zip(source_dir, output, args.version)
-    print(f"DELIVER_OK {output} ({count} Dateien)")
+    print(f"DELIVER_OK {output} ({count} files)")
     return 0
 
 

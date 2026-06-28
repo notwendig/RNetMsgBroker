@@ -16,6 +16,7 @@
 
 ```bash
 ./scripts/check.sh
+./build/RNetMsgBrokerTest --libversion
 ```
 
 Ergebnis:

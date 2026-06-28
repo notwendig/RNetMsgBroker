@@ -33,3 +33,11 @@ sequenceDiagram
 - `runtime.drive`
 - `runtime.ui`
 - `unknown.observed`
+
+## Tooling note
+
+Mit v1.0.0 kann die verwendete Library-Version eindeutig dokumentiert werden:
+
+```bash
+RNetMsgBrokerTest --libversion
+```

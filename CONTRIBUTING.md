@@ -8,6 +8,7 @@
 
 ```bash
 ./scripts/check.sh
+./build/RNetMsgBrokerTest --libversion
 ```
 
 Das prüft JSON, baut das Projekt und erzeugt eine Beispiel-CSV aus den Testdaten, sofern Qt/CMake lokal verfügbar sind.
@@ -50,3 +51,7 @@ Bitte angeben:
 - Quelle: candump, Dokumentation oder Code
 - Sicherheitsrelevanz
 - Testergebnis von `./scripts/check.sh`
+
+## Version in Meldungen
+
+Bitte bei Bugs immer die Ausgabe von `RNetMsgBrokerTest --libversion` oder `RNetMsgBrokerTest --version` angeben.

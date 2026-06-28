@@ -4,9 +4,9 @@ set -euo pipefail
 # Repository smoke test:
 # 1. validate R-Net.json
 # 2. build project if CMake/Qt are available
-# 3. create CSV from bundled test data
-# 4. check that no decoder UNKNOWN appears in CSV
-# 5. create the delivery ZIP with CMake target deliver
+# 3. check version output
+# 4. create CSV from bundled known-good test data
+# 5. check that no decoder UNKNOWN appears in this known-good CSV
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
@@ -47,20 +47,23 @@ if [[ ! -x "$BIN" ]]; then
   BIN="$ROOT_DIR/build/Desktop_Debug/RNetMsgBrokerTest"
 fi
 
+"$BIN" --version
+LIBVERSION="$($BIN --libversion)"
+if [[ -z "$LIBVERSION" ]]; then
+  echo "leere Lib-Version" >&2
+  exit 6
+fi
+echo "LIBVERSION_OK $LIBVERSION"
+
 OUT="$ROOT_DIR/testdata/candump_sample.csv"
 "$BIN" -d "$ROOT_DIR/testdata/candump_sample.txt" --full -o "$OUT"
 
 test -s "$OUT"
 if grep -q 'UNKNOWN ' "$OUT"; then
-  echo "Decoder UNKNOWN in $OUT gefunden" >&2
+  echo "Decoder UNKNOWN in known-good sample $OUT gefunden" >&2
   grep 'UNKNOWN ' "$OUT" >&2
   exit 5
 fi
 
 echo "CSV_OK $OUT"
 python3 scripts/list_unknown_observed.py "$OUT" || true
-
-cmake --build "$ROOT_DIR/build" --target deliver
-DELIVER_ZIP="$ROOT_DIR/build/RNetMsgBroker_v$(head -1 VERSION.txt).zip"
-test -s "$DELIVER_ZIP"
-echo "DELIVER_OK $DELIVER_ZIP"

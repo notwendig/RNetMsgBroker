@@ -25,14 +25,16 @@ jobs:
       - name: Smoke test
         run: |
           ./build/RNetMsgBrokerTest --version
+          test "$(./build/RNetMsgBrokerTest --libversion)" = "1.0.0"
           ./build/RNetMsgBrokerTest -d testdata/candump_sample.txt --full -o candump_sample.csv
           test -s candump_sample.csv
+          ! grep -q 'UNKNOWN ' candump_sample.csv
 
-      - name: Deliver ZIP
+      - name: Delivery archive
         run: cmake --build build --target deliver
 
-      - name: Upload delivery ZIP
+      - name: Upload delivery archive
         uses: actions/upload-artifact@v4
         with:
-          name: RNetMsgBroker-delivery
-          path: build/RNetMsgBroker_v*.zip
+          name: RNetMsgBroker_v1.0.0
+          path: build/RNetMsgBroker_v1.0.0.zip

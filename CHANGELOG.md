@@ -1,11 +1,32 @@
 # Changelog
 
+## 1.0.0
+
+- Erste stabile GitHub-Release-Version.
+- Version überall auf `1.0.0` angehoben.
+- CI/Smoke-Test dokumentiert und auf Versionsausgabe, CSV-Erzeugung und Deliver-Archiv ausgerichtet.
+- `deliver` erzeugt das Release-Archiv `RNetMsgBroker_v1.0.0.zip`.
+- Dokumentation und Beispiele auf die stabile Version aktualisiert.
+
+## 0.2.17
+
+- `--version` and `--libversion` are now handled before `QCommandLineParser`, so they cannot be rejected as unknown options by parser setup.
+- `testdata/candump_sample.txt` is now a known-good sample without intentional decoder `UNKNOWN` frames.
+- `scripts/check.sh` checks the known-good sample and still reports real decoder misses.
+- Documentation updated for the robust version switches and the corrected smoke-test sample.
+
+## 0.2.16
+
+- `RNetMsgBrokerTest --version` aktiviert die Qt-Standardversionsausgabe.
+- `RNetMsgBrokerTest --libversion` gibt nur die reine Library-Version aus.
+- Normale Textausgabe ohne `--out` beginnt mit `libversion: ...`.
+- Alle Markdown-/Doku-Dateien auf Version 0.2.16 und die neuen Versionsbefehle aktualisiert.
+
 ## 0.2.15
 
 - CMake-Target `deliver` ergänzt.
-- `scripts/deliver.py` erzeugt ein reproduzierbares, versioniertes Quell-ZIP.
-- `scripts/deliver.sh` ergänzt als einfacher Wrapper für Build + Delivery.
-- GitHub-Actions-Workflow erzeugt und veröffentlicht das Delivery-ZIP als Workflow-Artefakt.
+- `deliver` erzeugt `RNetMsgBroker_v${PROJECT_VERSION}.zip` im Build-Verzeichnis.
+- Das Archiv wird mit `cmake -E tar --format=zip` erstellt und benötigt kein externes `zip`-Programm.
 
 ## 0.2.14
 

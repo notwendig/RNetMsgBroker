@@ -17,4 +17,4 @@ RNetMsgBroker ist ein Decoder und Analysewerkzeug. Es soll Frames lesen, klassif
 
 ## Meldungen
 
-Sicherheitsrelevante Fehler bitte mit Logausschnitt, Version und Reproduktionsschritten melden. Keine sensiblen Seriennummern veröffentlichen, wenn sie einer realen Person oder einem realen Hilfsmittel zugeordnet werden können.
+Sicherheitsrelevante Fehler bitte mit Logausschnitt, Version (`RNetMsgBrokerTest --libversion`) und Reproduktionsschritten melden. Keine sensiblen Seriennummern veröffentlichen, wenn sie einer realen Person oder einem realen Hilfsmittel zugeordnet werden können.

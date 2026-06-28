@@ -53,3 +53,14 @@ Use this for frames that match a repeated pattern but whose meaning is not prove
 ```
 
 This is different from a real decoder `UNKNOWN` output. It means the frame is recognized but not fully understood.
+
+## Validation
+
+Vor Commit/Release immer prüfen:
+
+```bash
+python3 -m json.tool R-Net.json >/dev/null && echo JSON_OK
+./scripts/check.sh
+```
+
+`R-Net.json` enthält keine Kommentare und keine Tippfehler-Aliase.
