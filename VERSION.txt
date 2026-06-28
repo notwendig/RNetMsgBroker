@@ -1,7 +1,6 @@
-0.2.13
+0.2.15
 
-- GitHub-Pflegedateien ergänzt: CHANGELOG, AUTHORS, CONTRIBUTING, SECURITY, Pull-Request-Template und Issue-Template.
-- Skripte ergänzt: build.sh, check.sh, candump_to_csv.sh, list_unknown_observed.py.
-- Doku ergänzt: CSV_FORMAT, RNET_JSON_SCHEMA, STARTUP_SEQUENCE, UNKNOWN_FRAMES.
-- Öffentliche Header und zentrale Parser-/CSV-Funktionen kommentiert.
-- Optionales CMake-install target ergänzt.
+- CMake-Build-Target `deliver` ergänzt.
+- `scripts/deliver.py` erzeugt ein versioniertes Quell-ZIP ohne Build-/Git-/Ausgabedateien.
+- `scripts/deliver.sh` baut das Projekt und ruft anschließend das Deliver-Target auf.
+- GitHub-CI erzeugt das Delivery-ZIP als Artefakt.

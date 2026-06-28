@@ -22,7 +22,6 @@ core
 tags
 .DS_Store
 .directory
-.qtcreator
 *.debug
 Makefile*
 *.prl

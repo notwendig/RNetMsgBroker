@@ -88,9 +88,9 @@ private:
         bool bigEndian = false;
         bool isSigned = false;
         bool hasByteWindow = false;
-        QString cycle;       // Alt-JSON: fields[].zyklu/zyklus; neu bevorzugt: Definition::cycle
+        QString cycle;       // JSON: fields[].zyklus; normally inherited from Definition::cycle
         QString unit;        // JSON: unit/einheit
-        QString description; // JSON: descipt/descript/description/desc/beschreibung
+        QString description; // JSON: description
     };
 
     struct DataMatcher
@@ -147,8 +147,6 @@ private:
     static Endian endianFromJson(const QJsonObject &object, Endian fallback = Endian::Little);
     static quint64 bytesToInteger(const QByteArray &data, int offset, int width, bool bigEndian);
     static qint64 signExtend(quint64 value, int bitCount);
-    static QByteArray relaxedJsonToStrict(const QByteArray &data);
-    static QString stripLineComments(const QString &text);
     static QList<QJsonObject> objectsFromDocument(const QJsonDocument &doc, QString *errorString);
 
     DefinitionMap m_definitionsByIdResult;

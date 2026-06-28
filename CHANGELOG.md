@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.15
+
+- CMake-Target `deliver` ergänzt.
+- `scripts/deliver.py` erzeugt ein reproduzierbares, versioniertes Quell-ZIP.
+- `scripts/deliver.sh` ergänzt als einfacher Wrapper für Build + Delivery.
+- GitHub-Actions-Workflow erzeugt und veröffentlicht das Delivery-ZIP als Workflow-Artefakt.
+
+## 0.2.14
+
+- `R-Net.json` auf korrekt geschriebene Schlüssel normalisiert (`big_endian`, `description`, `fields`, `phase`).
+- Tippfehler-Aliase aus Parser und Dokumentation entfernt.
+- `readJson()` verlangt wieder syntaktisch gültiges JSON ohne automatischen Reparaturversuch.
+- `scripts/check.sh` prüft `R-Net.json` zusätzlich auf verbotene Tippfehler-Schlüssel.
+
 ## 0.2.13
 
 - GitHub-Pflegestand ergänzt: `CHANGELOG.md`, `AUTHORS.md`, `CONTRIBUTING.md`, `SECURITY.md`, Pull-Request-Template und Issue-Template.

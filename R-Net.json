@@ -1,6 +1,6 @@
 {
   "$schema": "RNetMsgBroker/1",
-  "description": "R-Net frame definitions for RNetMsgBroker. v0.2.9 includes candump coverage fixes.",
+  "description": "R-Net frame definitions for RNetMsgBroker. v0.2.15 adds a CMake deliver target for versioned ZIP packaging.",
   "frames": [
     {
       "extended": false,
@@ -20,7 +20,7 @@
           "name": "Modul",
           "bit_mask": "0xf0",
           "shift": 4,
-          "big_endien": false
+          "big_endian": false
         }
       ],
       "fields": [
@@ -28,17 +28,17 @@
           "name": "field_1",
           "bit_mask": "0x00ff00",
           "shift": 8,
-          "big_endien": false,
+          "big_endian": false,
           "einheit": "",
-          "descipt": "oberes Beispiel-Datenbyte"
+          "description": "oberes Beispiel-Datenbyte"
         },
         {
           "name": "field_2",
           "bit_mask": "0x0000ff",
           "shift": 0,
-          "big_endien": false,
+          "big_endian": false,
           "einheit": "",
-          "descipt": "unteres Beispiel-Datenbyte"
+          "description": "unteres Beispiel-Datenbyte"
         }
       ]
     },
@@ -792,31 +792,31 @@
           "sig_name": "left_indicator",
           "bit_mask": "0x01",
           "shift": 0,
-          "big_endien": false
+          "big_endian": false
         },
         {
           "sig_name": "right_indicator",
           "bit_mask": "0x02",
           "shift": 1,
-          "big_endien": false
+          "big_endian": false
         },
         {
           "sig_name": "hazard",
           "bit_mask": "0x04",
           "shift": 2,
-          "big_endien": false
+          "big_endian": false
         },
         {
           "sig_name": "lights",
           "bit_mask": "0x08",
           "shift": 3,
-          "big_endien": false
+          "big_endian": false
         },
         {
           "sig_name": "horn_or_aux",
           "bit_mask": "0x10",
           "shift": 4,
-          "big_endien": false
+          "big_endian": false
         }
       ]
     },
@@ -1160,14 +1160,14 @@
           "byte": 0,
           "width": 4,
           "big_endian": true,
-          "descipt": "first four serial bytes"
+          "description": "first four serial bytes"
         },
         {
           "name": "serial_tail",
           "byte": 4,
           "width": 4,
           "big_endian": true,
-          "descipt": "remaining heartbeat bytes"
+          "description": "remaining heartbeat bytes"
         }
       ]
     },
@@ -1360,7 +1360,7 @@
           "byte": 0,
           "width": 8,
           "big_endian": true,
-          "descipt": "8 byte device serial"
+          "description": "8 byte device serial"
         }
       ]
     },
@@ -2447,14 +2447,14 @@
           "byte": 0,
           "width": 1,
           "signed": true,
-          "descipt": "X-axis signed int8"
+          "description": "X-axis signed int8"
         },
         {
           "name": "y_axis",
           "byte": 1,
           "width": 1,
           "signed": true,
-          "descipt": "Y-axis signed int8"
+          "description": "Y-axis signed int8"
         }
       ]
     },
@@ -2485,7 +2485,7 @@
           "byte": 0,
           "width": 1,
           "einheit": "%",
-          "descipt": "raw percentage value 0x00-0x64"
+          "description": "raw percentage value 0x00-0x64"
         }
       ]
     },
@@ -2634,7 +2634,7 @@
           "name": "current_raw",
           "byte": 0,
           "width": 2,
-          "descipt": "little-endian raw current"
+          "description": "little-endian raw current"
         }
       ]
     },
@@ -2869,7 +2869,7 @@
           "byte": 0,
           "width": 1,
           "einheit": "%",
-          "descipt": "raw percentage value 0x00-0x64"
+          "description": "raw percentage value 0x00-0x64"
         }
       ]
     },
@@ -3979,7 +3979,7 @@
           "name": "sub_id",
           "bit_mask": "0xFF",
           "shift": 0,
-          "big_endien": false
+          "big_endian": false
         }
       ],
       "fields": [
@@ -3988,7 +3988,7 @@
           "byte": 0,
           "width": 8,
           "big_endian": true,
-          "descipt": "raw payload"
+          "description": "raw payload"
         }
       ]
     },
@@ -4032,13 +4032,13 @@
           "name": "request_group",
           "bit_mask": "0x000F0000",
           "shift": 16,
-          "big_endien": false
+          "big_endian": false
         },
         {
           "name": "request_value",
           "bit_mask": "0x0000FFFF",
           "shift": 0,
-          "big_endien": false
+          "big_endian": false
         }
       ]
     }

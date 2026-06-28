@@ -1,8 +1,8 @@
 # R-Net JSON catalogue
 
-`R-Net.json` is a practical catalogue, not a strict formal schema. The broker reads it tolerantly so the file can also be used during reverse engineering.
+`R-Net.json` must be syntactically valid JSON and should use only the canonical keys documented here.
 
-## Recommended frame fields
+## Required / recommended frame fields
 
 ```json
 {
@@ -20,6 +20,23 @@
   "fields": []
 }
 ```
+
+## Field entries
+
+```json
+{
+  "name": "x_axis",
+  "byte": 0,
+  "width": 1,
+  "signed": true,
+  "big_endian": true,
+  "description": "X-axis signed int8"
+}
+```
+
+## Canonical spellings
+
+Use only the canonical spellings shown above. Typo aliases are not accepted.
 
 ## Meaning of phase / quelle / senke
 

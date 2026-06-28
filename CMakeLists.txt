@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(RNetMsgBroker VERSION 0.2.13 LANGUAGES CXX)
+project(RNetMsgBroker VERSION 0.2.15 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -74,4 +74,23 @@ install(FILES rnetmsgbroker.h RNetMsgBroker_global.h
 )
 install(FILES R-Net.json
   DESTINATION ${CMAKE_INSTALL_DATADIR}/RNetMsgBroker
+)
+
+# Delivery target: creates the same versioned source ZIP that is uploaded for releases.
+# Usage after configuring the project:
+#   cmake --build build --target deliver
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+set(RNETMSGBROKER_DELIVER_ZIP
+    "${CMAKE_BINARY_DIR}/RNetMsgBroker_v${PROJECT_VERSION}.zip")
+
+add_custom_target(deliver
+  COMMAND ${Python3_EXECUTABLE}
+          "${CMAKE_CURRENT_SOURCE_DIR}/scripts/deliver.py"
+          --source-dir "${CMAKE_CURRENT_SOURCE_DIR}"
+          --output "${RNETMSGBROKER_DELIVER_ZIP}"
+          --version "${PROJECT_VERSION}"
+  DEPENDS RNetMsgBroker RNetMsgBrokerTest
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  COMMENT "Creating ${RNETMSGBROKER_DELIVER_ZIP}"
+  VERBATIM
 )

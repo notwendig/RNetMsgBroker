@@ -2,11 +2,9 @@
 //
 // RNetMsgBroker core implementation.
 //
-// The broker loads editable R-Net/CAN frame definitions from R-Net.json,
-// matches incoming CAN frames against ID/data masks, and renders a compact
-// or metadata-rich text representation. The JSON reader is intentionally
-// tolerant because the frame catalogue is also used as a working reverse-
-// engineering notebook.
+// The broker loads editable R-Net/CAN frame definitions from strict,
+// syntactically valid JSON, matches incoming CAN frames against ID/data masks,
+// and renders a compact or metadata-rich text representation.
 
 #include "rnetmsgbroker.h"
 
@@ -46,7 +44,7 @@ QString RNetMsgBroker::versionString()
 #ifdef RNETMSGBROKER_VERSION_STRING
     return QStringLiteral(RNETMSGBROKER_VERSION_STRING);
 #else
-    return QStringLiteral("0.2.13");
+    return QStringLiteral("0.2.15");
 #endif
 }
 
@@ -66,18 +64,11 @@ bool RNetMsgBroker::readJson(const QString &jsonFilename, QString *errorString)
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(rawJson, &parseError);
     if (parseError.error != QJsonParseError::NoError) {
-        // Zweiter Versuch: kleine, in Notizen häufige JSON-Abweichungen normalisieren
-        // (typografische Anführungszeichen, unquotierte Keys, hex-Zahlen wie 0x12).
-        const QByteArray strictJson = relaxedJsonToStrict(rawJson);
-        QJsonParseError relaxedParseError;
-        doc = QJsonDocument::fromJson(strictJson, &relaxedParseError);
-        if (relaxedParseError.error != QJsonParseError::NoError) {
-            if (errorString)
-                *errorString = tr("JSON-Parsefehler bei Offset %1: %2")
-                                   .arg(parseError.offset)
-                                   .arg(parseError.errorString());
-            return false;
-        }
+        if (errorString)
+            *errorString = tr("JSON-Parsefehler bei Offset %1: %2")
+                               .arg(parseError.offset)
+                               .arg(parseError.errorString());
+        return false;
     }
 
     const QList<QJsonObject> objects = objectsFromDocument(doc, errorString);
@@ -292,14 +283,11 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
 
     stringByNames(json, {QStringLiteral("rnet_name"), QStringLiteral("rnet-name"), QStringLiteral("name")}, &definition->rnetName);
     stringByNames(json, {QStringLiteral("frametype"), QStringLiteral("frame-type"), QStringLiteral("frame_type"), QStringLiteral("type")}, &definition->frameType);
-    textByNames(json, {QStringLiteral("phase"), QStringLiteral("pfase"), QStringLiteral("startup_phase"), QStringLiteral("startup-phase")}, &definition->phase);
-    textByNames(json, {QStringLiteral("quelle"), QStringLiteral("src")}, &definition->source);
-    textByNames(json, {QStringLiteral("senke"), QStringLiteral("sink"), QStringLiteral("dst"), QStringLiteral("destination"), QStringLiteral("target")}, &definition->sink);
+    textByNames(json, {QStringLiteral("phase")}, &definition->phase);
+    textByNames(json, {QStringLiteral("quelle")}, &definition->source);
+    textByNames(json, {QStringLiteral("senke")}, &definition->sink);
     stringByNames(json, {QStringLiteral("summary"), QStringLiteral("description"), QStringLiteral("desc")}, &definition->summary);
-    textByNames(json,
-                {QStringLiteral("zyklus"), QStringLiteral("zyklu"), QStringLiteral("cycle"),
-                 QStringLiteral("cyclus"), QStringLiteral("period"), QStringLiteral("intervall"), QStringLiteral("interval")},
-                &definition->cycle);
+    textByNames(json, {QStringLiteral("zyklus")}, &definition->cycle);
 
     if (definition->rnetName.isEmpty())
         definition->rnetName = QStringLiteral("RNet_%1_%2").arg(hex32(definition->idResult), hex32(definition->idAndMask));
@@ -352,7 +340,7 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
 
     QJsonValue fieldsValue;
     valueByNames(json,
-                 {QStringLiteral("fields"), QStringLiteral("fieds"), QStringLiteral("signals")},
+                 {QStringLiteral("fields")},
                  &fieldsValue);
     if (fieldsValue.isArray()) {
         const QJsonArray fields = fieldsValue.toArray();
@@ -398,23 +386,15 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
 
             field.bigEndian = (endianFromJson(item, Endian::Little) == Endian::Big);
             boolByNames(item,
-                        {QStringLiteral("big_endian"), QStringLiteral("big-endian"), QStringLiteral("big_endien"), QStringLiteral("big-endien")},
+                        {QStringLiteral("big_endian"), QStringLiteral("big-endian")},
                         &field.bigEndian);
             boolByNames(item, {QStringLiteral("signed"), QStringLiteral("is_signed")}, &field.isSigned);
-            // Ab v0.2.2 gehoert der Zyklus zur Frame-Definition (frames[].zyklus).
-            // Alte JSON-Dateien mit fields[].zyklu/zyklus bleiben lesbar; falls dort nichts
-            // steht, erbt das Feld den Frame-Zyklus als interne Metainformation.
-            textByNames(item,
-                        {QStringLiteral("zyklu"), QStringLiteral("zyklus"), QStringLiteral("cycle"),
-                         QStringLiteral("cyclus"), QStringLiteral("period"), QStringLiteral("intervall"), QStringLiteral("interval")},
-                        &field.cycle);
+            // Ab v0.2.14 wird nur noch das korrekt geschriebene Feld "zyklus" akzeptiert.
+            textByNames(item, {QStringLiteral("zyklus")}, &field.cycle);
             if (field.cycle.isEmpty())
                 field.cycle = definition->cycle;
             textByNames(item, {QStringLiteral("einheit"), QStringLiteral("unit"), QStringLiteral("units")}, &field.unit);
-            textByNames(item,
-                        {QStringLiteral("descipt"), QStringLiteral("descript"), QStringLiteral("description"),
-                         QStringLiteral("desc"), QStringLiteral("beschreibung")},
-                        &field.description);
+            textByNames(item, {QStringLiteral("description")}, &field.description);
 
             definition->fields << field;
         }
@@ -442,7 +422,7 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
                 definition->dataMatcher.width = static_cast<int>(width);
             definition->dataMatcher.bigEndian = (endianFromJson(dataObject, Endian::Little) == Endian::Big);
             boolByNames(dataObject,
-                        {QStringLiteral("big_endian"), QStringLiteral("big-endian"), QStringLiteral("big_endien"), QStringLiteral("big-endien")},
+                        {QStringLiteral("big_endian"), QStringLiteral("big-endian")},
                         &definition->dataMatcher.bigEndian);
         } else {
             quint64 value = 0;
@@ -829,77 +809,6 @@ qint64 RNetMsgBroker::signExtend(quint64 value, int bitCount)
     if (value & signBit)
         value |= ~mask;
     return static_cast<qint64>(value);
-}
-
-// Convert common hand-written catalogue notation into strict JSON without
-// changing already-valid JSON. This is deliberately conservative.
-QByteArray RNetMsgBroker::relaxedJsonToStrict(const QByteArray &data)
-{
-    QString text = QString::fromUtf8(data);
-    text.replace(QChar(0x201C), QLatin1Char('"'));
-    text.replace(QChar(0x201D), QLatin1Char('"'));
-    text.replace(QChar(0x201E), QLatin1Char('"'));
-    text.replace(QChar(0x201F), QLatin1Char('"'));
-
-    text = stripLineComments(text);
-
-    // {name:...} oder ,bit_mask:... -> {"name":...}
-    text.replace(QRegularExpression(QStringLiteral("([\\{,]\\s*)([A-Za-z_][A-Za-z0-9_\\-]*)\\s*:")),
-                 QStringLiteral("\\1\"\\2\":"));
-
-    // JSON kennt keine hex-Zahlen. Wir machen daraus Strings, die jsonValueToUInt64()
-    // anschließend wie bisher als 0x... lesen kann.
-    text.replace(QRegularExpression(QStringLiteral("(:\\s*)([+-]?0x[0-9A-Fa-f]+)(\\s*[,}\\]])")),
-                 QStringLiteral("\\1\"\\2\"\\3"));
-
-    // Barewords als Stringwerte akzeptieren, aber true/false/null unverändert lassen.
-    text.replace(QRegularExpression(QStringLiteral("(:\\s*)(?!(?:true|false|null)\\b)([A-Za-z_][A-Za-z0-9_\\-]*)(\\s*[,}\\]])")),
-                 QStringLiteral("\\1\"\\2\"\\3"));
-
-    return text.toUtf8();
-}
-
-QString RNetMsgBroker::stripLineComments(const QString &text)
-{
-    QString out;
-    out.reserve(text.size());
-
-    bool inString = false;
-    bool escape = false;
-    for (int i = 0; i < text.size(); ++i) {
-        const QChar ch = text.at(i);
-        const QChar next = (i + 1 < text.size()) ? text.at(i + 1) : QChar();
-
-        if (inString) {
-            out.append(ch);
-            if (escape) {
-                escape = false;
-            } else if (ch == QLatin1Char('\\')) {
-                escape = true;
-            } else if (ch == QLatin1Char('"')) {
-                inString = false;
-            }
-            continue;
-        }
-
-        if (ch == QLatin1Char('"')) {
-            inString = true;
-            out.append(ch);
-            continue;
-        }
-
-        if (ch == QLatin1Char('/') && next == QLatin1Char('/')) {
-            while (i < text.size() && text.at(i) != QLatin1Char('\n'))
-                ++i;
-            if (i < text.size())
-                out.append(text.at(i));
-            continue;
-        }
-
-        out.append(ch);
-    }
-
-    return out;
 }
 
 QList<QJsonObject> RNetMsgBroker::objectsFromDocument(const QJsonDocument &doc, QString *errorString)

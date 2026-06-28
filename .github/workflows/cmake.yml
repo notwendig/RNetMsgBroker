@@ -27,3 +27,12 @@ jobs:
           ./build/RNetMsgBrokerTest --version
           ./build/RNetMsgBrokerTest -d testdata/candump_sample.txt --full -o candump_sample.csv
           test -s candump_sample.csv
+
+      - name: Deliver ZIP
+        run: cmake --build build --target deliver
+
+      - name: Upload delivery ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: RNetMsgBroker-delivery
+          path: build/RNetMsgBroker_v*.zip
