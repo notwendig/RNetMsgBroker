@@ -1,6 +1,10 @@
 # RNetMsgBroker
 
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+
 ## Version
+
+1.0.1 — GPL-3.0-only Lizenz ergänzt, SPDX-Hinweise gesetzt und Release-/CI-/Doku-Dateien aktualisiert.
 
 1.0.0 — Erste stabile GitHub-Release-Version. Enthält strikt gültige `R-Net.json`, Semikolon-CSV, robuste Versionsausgabe, `deliver`-Target und GitHub-CI.
 
@@ -106,13 +110,13 @@ RNetJsmSerialHeartbeat; serial32=0xfc801ecd; serial_tail=0x0; {typ=serial, phase
 `--version` wird vor dem Qt-CommandLineParser abgefangen und gibt die Test-App-/Library-Version aus. `--libversion` gibt nur die reine Library-Version aus, z. B.:
 
 ```text
-1.0.0
+1.0.1
 ```
 
 Bei normaler Textausgabe ohne `--out` steht die Library-Version zusätzlich in der ersten Ausgabezeile:
 
 ```text
-libversion: 1.0.0
+libversion: 1.0.1
 geladen: 187 Definitionen aus ...
 ```
 
@@ -134,7 +138,7 @@ zeile;zeit;interface;can_id;format;rtr;dlc;data;name;typ;phase;quelle;senke;ausg
 
 Enthalten sind `CHANGELOG.md`, `AUTHORS.md`, `CONTRIBUTING.md`, `SECURITY.md`, GitHub-Templates, `scripts/build.sh`, `scripts/check.sh`, `scripts/candump_to_csv.sh`, `scripts/list_unknown_observed.py` und die Dokumente unter `docs/`.
 
-Die Lizenz ist bewusst nicht automatisch festgelegt. Vor öffentlicher Veröffentlichung bitte eine passende `LICENSE` ergänzen.
+Lizenz: **GNU General Public License v3.0 only** (`GPL-3.0-only`). Die vollständige Lizenz steht in `LICENSE`; Quell- und Skriptdateien tragen SPDX-Hinweise.
 
 ## Build
 

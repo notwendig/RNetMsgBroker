@@ -1,5 +1,15 @@
 # Changelog
 
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+
+## 1.0.1
+
+- Projektlizenz auf `GPL-3.0-only` festgelegt.
+- Vollständige GPLv3-Lizenz als `LICENSE` ergänzt und `LICENSE_TODO.md` entfernt.
+- SPDX-License-Identifier in Quellcode, CMake, Skripten, CI/Templates und Markdown-Doku ergänzt.
+- Version, CI-Artifact und `deliver`-Archiv auf `RNetMsgBroker_v1.0.1.zip` aktualisiert.
+- README, VERSION und docs auf den Lizenz-/Release-Stand aktualisiert.
+
 ## 1.0.0
 
 - Erste stabile GitHub-Release-Version.

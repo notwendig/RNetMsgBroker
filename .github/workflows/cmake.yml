@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 name: CMake
 
 on:
@@ -25,7 +27,7 @@ jobs:
       - name: Smoke test
         run: |
           ./build/RNetMsgBrokerTest --version
-          test "$(./build/RNetMsgBrokerTest --libversion)" = "1.0.0"
+          test "$(./build/RNetMsgBrokerTest --libversion)" = "1.0.1"
           ./build/RNetMsgBrokerTest -d testdata/candump_sample.txt --full -o candump_sample.csv
           test -s candump_sample.csv
           ! grep -q 'UNKNOWN ' candump_sample.csv
@@ -36,5 +38,5 @@ jobs:
       - name: Upload delivery archive
         uses: actions/upload-artifact@v4
         with:
-          name: RNetMsgBroker_v1.0.0
-          path: build/RNetMsgBroker_v1.0.0.zip
+          name: RNetMsgBroker_v1.0.1
+          path: build/RNetMsgBroker_v1.0.1.zip

@@ -1,5 +1,7 @@
 # Authors and sources
 
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+
 ## Projekt
 
 - Jürgen W. Sievers / R-Net Analyzer project context
@@ -20,3 +22,7 @@ R-Net ist ein sicherheitskritisches Rollstuhl-Steuerungssystem. Die Namen und Be
 ## Versioning
 
 Die in Fehlerberichten und Releases genutzte Version stammt aus `RNetMsgBroker::versionString()` und kann mit `RNetMsgBrokerTest --libversion` abgefragt werden.
+
+## Lizenz
+
+Der Projektcode steht unter `GPL-3.0-only`; siehe `LICENSE`.

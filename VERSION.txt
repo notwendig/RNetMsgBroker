@@ -1,10 +1,11 @@
-1.0.0
+1.0.1
 
-- Erste stabile GitHub-Release-Version.
-- Library-Version wird über `RNetMsgBroker::versionString()` bereitgestellt.
-- `RNetMsgBrokerTest --version` gibt `RNetMsgBrokerTest <version>` aus.
-- `RNetMsgBrokerTest --libversion` gibt nur die reine Library-Version aus.
-- `RNetMsgBrokerTest --out/-o` schreibt reine Semikolon-CSV.
-- `cmake --build build --target deliver` erzeugt `RNetMsgBroker_v1.0.0.zip`.
-- `R-Net.json` ist strikt syntaktisch gültiges JSON mit korrekt geschriebenen Schlüsseln.
+- GPL-3.0-only Lizenz ergänzt.
+- Vollständige GNU GPLv3 in LICENSE aufgenommen.
+- LICENSE_TODO.md entfernt.
+- SPDX-License-Identifier in Quell-/Script-/CI-/Doku-Dateien ergänzt.
+- `cmake --build build --target deliver` erzeugt `RNetMsgBroker_v1.0.1.zip`.
+- `RNetMsgBrokerTest --version` gibt `RNetMsgBrokerTest 1.0.1` aus.
+- `RNetMsgBrokerTest --libversion` gibt `1.0.1` aus.
+- `R-Net.json` bleibt strikt syntaktisch gültiges JSON ohne Kommentare.
 - Enthält 187 R-Net-Frame-Definitionen mit `phase`, `quelle`, `senke`.

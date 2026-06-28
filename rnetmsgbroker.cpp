@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: LicenseRef-ProjectOwner
+// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-only
 //
 // RNetMsgBroker core implementation.
 //
@@ -44,7 +45,7 @@ QString RNetMsgBroker::versionString()
 #ifdef RNETMSGBROKER_VERSION_STRING
     return QStringLiteral(RNETMSGBROKER_VERSION_STRING);
 #else
-    return QStringLiteral("1.0.0");
+    return QStringLiteral("1.0.1");
 #endif
 }
 

@@ -1,5 +1,7 @@
 # Security and safety policy
 
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+
 ## Sicherheitskritischer Kontext
 
 R-Net/CAN wird in elektrischen Rollstühlen eingesetzt. Fehlerhafte Interpretation oder aktive Einspeisung von Frames kann gefährliche Bewegungen oder Systemfehler auslösen.
@@ -18,3 +20,7 @@ RNetMsgBroker ist ein Decoder und Analysewerkzeug. Es soll Frames lesen, klassif
 ## Meldungen
 
 Sicherheitsrelevante Fehler bitte mit Logausschnitt, Version (`RNetMsgBrokerTest --libversion`) und Reproduktionsschritten melden. Keine sensiblen Seriennummern veröffentlichen, wenn sie einer realen Person oder einem realen Hilfsmittel zugeordnet werden können.
+
+## Lizenz
+
+Dieses Projekt steht unter `GPL-3.0-only`.

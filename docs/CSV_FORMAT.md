@@ -1,5 +1,7 @@
 # CSV format
 
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+
 `RNetMsgBrokerTest --out/-o` writes semicolon separated CSV.
 
 Header:

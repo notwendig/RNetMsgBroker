@@ -1,5 +1,7 @@
 # R-Net JSON catalogue
 
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+
 `R-Net.json` must be syntactically valid JSON and should use only the canonical keys documented here.
 
 ## Required / recommended frame fields

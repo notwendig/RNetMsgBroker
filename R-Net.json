@@ -1,6 +1,6 @@
 {
   "$schema": "RNetMsgBroker/1",
-  "description": "R-Net frame definitions for RNetMsgBroker. v1.0.0 stable release: strict JSON keys, CSV export, version diagnostics and deliver target.",
+  "description": "R-Net frame definitions for RNetMsgBroker. v1.0.1 GPL-3.0-only release: strict JSON keys, CSV export, version diagnostics and deliver target.",
   "frames": [
     {
       "extended": false,

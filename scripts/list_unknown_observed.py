@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-only
 """List and count frames with phase=unknown.observed in RNetMsgBroker CSV."""
 
 from __future__ import annotations

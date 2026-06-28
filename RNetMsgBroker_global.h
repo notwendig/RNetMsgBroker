@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-only
 #ifndef RNETMSGBROKER_GLOBAL_H
 #define RNETMSGBROKER_GLOBAL_H
 
