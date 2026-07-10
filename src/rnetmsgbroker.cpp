@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-ProjectOwner
+// SPDX-License-Identifier: GPL-3.0-only
 //
 // RNetMsgBroker core implementation.
 //
@@ -7,6 +7,7 @@
 // and renders a compact or metadata-rich text representation.
 
 #include "rnetmsgbroker.h"
+#include <cmath>
 
 #include <QFile>
 #include <QJsonArray>
@@ -210,6 +211,47 @@ QString RNetMsgBroker::toString(quint32 canId, const QByteArray &data, bool exte
     msg.remote = remote;
     return toString(msg, full);
 }
+
+QJsonObject RNetMsgBroker::properties(const CanMsg &msg) const
+{
+    Definition best;
+    bool found = false;
+    int bestScore = -1;
+
+    for (auto it = m_definitionsByIdResult.cbegin(); it != m_definitionsByIdResult.cend(); ++it) {
+        const Definition &definition = it.value();
+        if (!matches(definition, msg))
+            continue;
+
+        int score = popCount32(definition.idAndMask);
+        if (definition.extended != AnyFlag)
+            score += 4;
+        if (definition.remote != AnyFlag)
+            score += 8;
+        if (definition.dataMatcher.enabled)
+            score += 64 + popCount64(definition.dataMatcher.mask);
+        score += definition.fields.size();
+
+        if (!found || score > bestScore) {
+            best = definition;
+            found = true;
+            bestScore = score;
+        }
+    }
+
+    return found ? best.originalJson : QJsonObject();
+}
+
+QJsonObject RNetMsgBroker::properties(quint32 canId, const QByteArray &data, bool extended, bool remote) const
+{
+    CanMsg msg;
+    msg.canId = canId;
+    msg.data = data;
+    msg.extended = extended;
+    msg.remote = remote;
+    return properties(msg);
+}
+
 
 int RNetMsgBroker::count() const
 {
@@ -705,10 +747,21 @@ bool RNetMsgBroker::jsonValueToUInt64(const QJsonValue &value, quint64 *number)
 {
     if (value.isDouble()) {
         const double d = value.toDouble();
-        if (d < 0.0)
+        if (!std::isfinite(d) || d < 0.0)
             return false;
+
+        const double rounded = std::floor(d);
+        if (!qFuzzyCompare(d + 1.0, rounded + 1.0))
+            return false;
+
+        // Qt JSON stores numbers as double. Above 2^53 not every integer is
+        // exactly representable, so masks/IDs must be written as strings.
+        constexpr double kMaxExactJsonInteger = 9007199254740992.0; // 2^53
+        if (d > kMaxExactJsonInteger)
+            return false;
+
         if (number)
-            *number = static_cast<quint64>(d);
+            *number = static_cast<quint64>(rounded);
         return true;
     }
 

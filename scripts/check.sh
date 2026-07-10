@@ -67,3 +67,6 @@ fi
 
 echo "CSV_OK $OUT"
 python3 scripts/list_unknown_observed.py "$OUT" || true
+
+# Extra catalogue safety checks.
+python3 "$(dirname "$0")/validate_rnet_json.py" "${1:-R-Net.json}"

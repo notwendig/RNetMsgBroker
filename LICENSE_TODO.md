@@ -1,3 +1,19 @@
+# Lizenzhinweis
+
+Dieses TODO wurde durch `LICENSE` ersetzt.
+
+# Lizenzhinweis
+
+Dieses TODO wurde durch `LICENSE` ersetzt.
+
+# Lizenzhinweis
+
+Dieses TODO wurde durch `LICENSE` ersetzt.
+
+# Lizenzhinweis
+
+Dieses TODO wurde durch `LICENSE` ersetzt.
+
 # License TODO
 
 Dieses Projekt enthält sicherheitskritische R-Net/CAN-Analysearbeit und Frame-Definitionen aus mehreren Quellen.

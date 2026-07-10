@@ -49,8 +49,15 @@ public:
 
     //! Decode a CAN message into text. `full=true` appends metadata.
     QString toString(const CanMsg &msg, bool full = false) const;
+
+    //! Return the original JSON definition/properties that best match a CAN message.
+    //! Returns an empty object when no definition matches.
+    QJsonObject properties(const CanMsg &msg) const;
     //! Convenience overload for callers that do not build CanMsg explicitly.
     QString toString(quint32 canId, const QByteArray &data, bool extended = false, bool remote = false, bool full = false) const;
+
+    //! Convenience overload for properties().
+    QJsonObject properties(quint32 canId, const QByteArray &data, bool extended = false, bool remote = false) const;
 
     //! Compile-time library/test-app version.
     static QString versionString();

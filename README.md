@@ -134,7 +134,7 @@ zeile;zeit;interface;can_id;format;rtr;dlc;data;name;typ;phase;quelle;senke;ausg
 
 Enthalten sind `CHANGELOG.md`, `AUTHORS.md`, `CONTRIBUTING.md`, `SECURITY.md`, GitHub-Templates, `scripts/build.sh`, `scripts/check.sh`, `scripts/candump_to_csv.sh`, `scripts/list_unknown_observed.py` und die Dokumente unter `docs/`.
 
-Die Lizenz ist bewusst nicht automatisch festgelegt. Vor öffentlicher Veröffentlichung bitte eine passende `LICENSE` ergänzen.
+Lizenz: GPL-3.0-only, siehe `LICENSE`. Vor Releases `scripts/validate_rnet_json.py` und `scripts/check.sh` ausführen.
 
 ## Build
 

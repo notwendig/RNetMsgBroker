@@ -90,7 +90,11 @@ if(RNETMSGBROKER_INSTALL)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
-    install(FILES rnetmsgbroker.h RNetMsgBroker_global.h
+    install(FILES
+        src/rnetmsgbroker.h
+        src/RNetMsgBroker_global.h
+        src/canframe.h
+        src/rnetframe.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/RNetMsgBroker
     )
     install(FILES R-Net.json DESTINATION ${CMAKE_INSTALL_DATADIR}/RNetMsgBroker)
@@ -108,11 +112,16 @@ if(RNETMSGBROKER_DELIVER)
         "${RNET_DELIVER_DIRNAME}/AUTHORS.md"
         "${RNET_DELIVER_DIRNAME}/CONTRIBUTING.md"
         "${RNET_DELIVER_DIRNAME}/SECURITY.md"
-        "${RNET_DELIVER_DIRNAME}/LICENSE_TODO.md"
         "${RNET_DELIVER_DIRNAME}/VERSION.txt"
-        "${RNET_DELIVER_DIRNAME}/RNetMsgBroker_global.h"
-        "${RNET_DELIVER_DIRNAME}/rnetmsgbroker.h"
-        "${RNET_DELIVER_DIRNAME}/rnetmsgbroker.cpp"
+        "${RNET_DELIVER_DIRNAME}/src/RNetMsgBroker_global.h"
+        "${RNET_DELIVER_DIRNAME}/src/rnetmsgbroker.h"
+        "${RNET_DELIVER_DIRNAME}/src/rnetmsgbroker.cpp"
+        "${RNET_DELIVER_DIRNAME}/src/canframe.h"
+        "${RNET_DELIVER_DIRNAME}/src/rnetframe.h"
+        "${RNET_DELIVER_DIRNAME}/src/rnetframe.cpp"
+        "${RNET_DELIVER_DIRNAME}/LICENSE"
+        "${RNET_DELIVER_DIRNAME}/docs/SAFETY_AND_VALIDATION.md"
+        "${RNET_DELIVER_DIRNAME}/scripts/validate_rnet_json.py"
         "${RNET_DELIVER_DIRNAME}/RNetMsgBroker_de_DE.ts"
         "${RNET_DELIVER_DIRNAME}/testapp/main.cpp"
         "${RNET_DELIVER_DIRNAME}/testdata/candump_sample.txt"
