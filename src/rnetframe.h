@@ -19,6 +19,7 @@
 #include <QString>
 
 #include <memory>
+#include <QMap>
 
 /**
  * @brief CAN frame with JSON-backed R-Net decoding and cached display text.
@@ -135,6 +136,19 @@ public:
      * @param frame Raw frame.
      * @return Newly allocated RNetFrame.
      */
+
+    /** @brief Decoded values from JSON id_parts, keyed by part name. */
+    QMap<QString, QString> i_parts;
+
+    /** @brief Decoded values from JSON fields, keyed by field name. */
+    QMap<QString, QString> fields;
+
+    /** @brief Alias/accessor for @ref i_parts. */
+    const QMap<QString, QString> &idParts() const;
+
+    /** @brief Alias/accessor for @ref fields. */
+    const QMap<QString, QString> &decodedFields() const;
+
     static std::unique_ptr<RNetFrame> decodeRNetMessage(const CanFrame &frame);
 
     /**
@@ -165,6 +179,9 @@ public:
     static Detail detailFromString(QString detail);
 
 private:
+
+    void interpretJsonPartsAndFields();
+
     RNetMsgBroker::CanMsg toBrokerMsg() const;
     QString brokerText(bool full) const;
     QString rawText() const;
