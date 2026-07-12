@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: GPL-3.0-only
 set -euo pipefail
 
 # Repository smoke test:
@@ -36,6 +35,10 @@ if found:
 print("JSON_KEYS_OK")
 PY
 
+# Full catalogue validation: duplicate matcher signatures, numeric ranges,
+# signed shifts and byte-window boundaries.
+python3 scripts/validate_rnet_json.py R-Net.json
+
 if command -v cmake >/dev/null 2>&1; then
   scripts/build.sh
 else
@@ -68,3 +71,5 @@ fi
 
 echo "CSV_OK $OUT"
 python3 scripts/list_unknown_observed.py "$OUT" || true
+
+# Catalogue safety checks ran before the build so broken JSON fails early.

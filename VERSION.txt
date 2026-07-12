@@ -1,11 +1,8 @@
 1.0.1
 
-- GPL-3.0-only Lizenz ergänzt.
-- Vollständige GNU GPLv3 in LICENSE aufgenommen.
-- LICENSE_TODO.md entfernt.
-- SPDX-License-Identifier in Quell-/Script-/CI-/Doku-Dateien ergänzt.
-- `cmake --build build --target deliver` erzeugt `RNetMsgBroker_v1.0.1.zip`.
-- `RNetMsgBrokerTest --version` gibt `RNetMsgBrokerTest 1.0.1` aus.
-- `RNetMsgBrokerTest --libversion` gibt `1.0.1` aus.
-- `R-Net.json` bleibt strikt syntaktisch gültiges JSON ohne Kommentare.
-- Enthält 187 R-Net-Frame-Definitionen mit `phase`, `quelle`, `senke`.
+- Optimierungs- und Fehlerbehebungsrelease.
+- `toString()` und `properties()` nutzen denselben Best-Match-Pfad.
+- JSON-Zahlenprüfung gegen stilles 32-Bit-Truncation gehärtet.
+- Signierte `shift`-Werte und Bytefenster-Validierung korrigiert.
+- `RNetFrame` cached den Default-JSON-Katalog stabil.
+- Doppelte JSON-Matcher-Definition entfernt; 186 eindeutige Definitionen.

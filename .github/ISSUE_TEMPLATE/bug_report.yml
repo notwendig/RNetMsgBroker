@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: GPL-3.0-only
-
 name: Bug report
 about: Fehler in Decoder, CSV-Ausgabe oder JSON-Frame-Katalog melden
 title: "[Bug]: "
@@ -10,7 +8,7 @@ body:
     attributes:
       label: Version
       description: Ausgabe von RNetMsgBrokerTest --version oder VERSION.txt
-      placeholder: "1.0.1"
+      placeholder: "1.0.0"
     validations:
       required: true
   - type: textarea

@@ -1,10 +1,8 @@
 # RNetMsgBroker
 
-<!-- SPDX-License-Identifier: GPL-3.0-only -->
-
 ## Version
 
-1.0.1 — GPL-3.0-only Lizenz ergänzt, SPDX-Hinweise gesetzt und Release-/CI-/Doku-Dateien aktualisiert.
+1.0.1 — Optimierungs- und Fehlerbehebungsrelease: gemeinsamer Best-Match-Pfad, gehärtete JSON-Zahlenprüfung, stabiler Default-Katalog-Cache und 186 eindeutige Matcher.
 
 1.0.0 — Erste stabile GitHub-Release-Version. Enthält strikt gültige `R-Net.json`, Semikolon-CSV, robuste Versionsausgabe, `deliver`-Target und GitHub-CI.
 
@@ -117,7 +115,7 @@ Bei normaler Textausgabe ohne `--out` steht die Library-Version zusätzlich in d
 
 ```text
 libversion: 1.0.1
-geladen: 187 Definitionen aus ...
+geladen: 186 Definitionen aus ...
 ```
 
 Bei `--out/-o` bleibt die Datei reine Semikolon-CSV; Versions- und Ladehinweise gehen nur ins Log.
@@ -138,7 +136,7 @@ zeile;zeit;interface;can_id;format;rtr;dlc;data;name;typ;phase;quelle;senke;ausg
 
 Enthalten sind `CHANGELOG.md`, `AUTHORS.md`, `CONTRIBUTING.md`, `SECURITY.md`, GitHub-Templates, `scripts/build.sh`, `scripts/check.sh`, `scripts/candump_to_csv.sh`, `scripts/list_unknown_observed.py` und die Dokumente unter `docs/`.
 
-Lizenz: **GNU General Public License v3.0 only** (`GPL-3.0-only`). Die vollständige Lizenz steht in `LICENSE`; Quell- und Skriptdateien tragen SPDX-Hinweise.
+Lizenz: GPL-3.0-only, siehe `LICENSE`. Vor Releases `scripts/validate_rnet_json.py` und `scripts/check.sh` ausführen.
 
 ## Build
 

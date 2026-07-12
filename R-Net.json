@@ -1,6 +1,6 @@
 {
   "$schema": "RNetMsgBroker/1",
-  "description": "R-Net frame definitions for RNetMsgBroker. v1.0.1 GPL-3.0-only release: strict JSON keys, CSV export, version diagnostics and deliver target.",
+  "description": "R-Net frame definitions for RNetMsgBroker. v1.0.0 stable release: strict JSON keys, CSV export, version diagnostics and deliver target.",
   "frames": [
     {
       "extended": false,
@@ -3917,28 +3917,6 @@
       "senke": "unknown",
       "summary": "unknown frame",
       "source": "redragonx/open-rnet reference/RNET_FRAME_DICTIONARY.md"
-    },
-    {
-      "extended": true,
-      "remote": "data",
-      "Id-and-mask": "0xFFFFF0FF",
-      "id-result": "0x140C0001",
-      "key-mask": "0xFFFFF0FF",
-      "rnet_name": "RNetUnknownMotorRelated140C0X01",
-      "frametype": "unknown",
-      "phase": "unknown.observed",
-      "quelle": "unknown",
-      "senke": "unknown",
-      "summary": "unknown, possibly motor related",
-      "source": "redragonx/open-rnet reference/RNET_FRAME_DICTIONARY.md",
-      "id_parts": [
-        {
-          "name": "device",
-          "bit_mask": "0xF00",
-          "endian": "l",
-          "shift": 8
-        }
-      ]
     },
     {
       "extended": true,

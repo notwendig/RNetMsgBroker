@@ -1,7 +1,5 @@
 # Observed R-Net startup sequence
 
-<!-- SPDX-License-Identifier: GPL-3.0-only -->
-
 The exact sender is not present in candump logs. `quelle` and `senke` are therefore best-effort roles inferred from frame families.
 
 ```mermaid
@@ -38,7 +36,7 @@ sequenceDiagram
 
 ## Tooling note
 
-Ab v1.0.0 kann die verwendete Library-Version eindeutig dokumentiert werden:
+Mit v1.0.1 kann die verwendete Library-Version eindeutig dokumentiert werden:
 
 ```bash
 RNetMsgBrokerTest --libversion

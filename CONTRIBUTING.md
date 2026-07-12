@@ -1,7 +1,5 @@
 # Contributing
 
-<!-- SPDX-License-Identifier: GPL-3.0-only -->
-
 ## Grundregel
 
 Änderungen an Decoder, JSON-Katalog und Skripten sollen nachvollziehbar, testbar und sicher bleiben. Keine Fahrversuche mit geänderten R-Net/CAN-Frames ohne sichere Testumgebung.
@@ -57,7 +55,3 @@ Bitte angeben:
 ## Version in Meldungen
 
 Bitte bei Bugs immer die Ausgabe von `RNetMsgBrokerTest --libversion` oder `RNetMsgBrokerTest --version` angeben.
-
-## Lizenzbeitrag
-
-Mit Beiträgen zu diesem Repository erklärst du, dass dein Beitrag unter `GPL-3.0-only` aufgenommen werden darf.
