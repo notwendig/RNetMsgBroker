@@ -35,6 +35,10 @@ if found:
 print("JSON_KEYS_OK")
 PY
 
+# Full catalogue validation: duplicate matcher signatures, numeric ranges,
+# signed shifts and byte-window boundaries.
+python3 scripts/validate_rnet_json.py R-Net.json
+
 if command -v cmake >/dev/null 2>&1; then
   scripts/build.sh
 else
@@ -68,5 +72,4 @@ fi
 echo "CSV_OK $OUT"
 python3 scripts/list_unknown_observed.py "$OUT" || true
 
-# Extra catalogue safety checks.
-python3 "$(dirname "$0")/validate_rnet_json.py" "${1:-R-Net.json}"
+# Catalogue safety checks ran before the build so broken JSON fails early.

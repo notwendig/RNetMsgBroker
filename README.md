@@ -2,6 +2,8 @@
 
 ## Version
 
+1.0.1 — Optimierungs- und Fehlerbehebungsrelease: gemeinsamer Best-Match-Pfad, gehärtete JSON-Zahlenprüfung, stabiler Default-Katalog-Cache und 186 eindeutige Matcher.
+
 1.0.0 — Erste stabile GitHub-Release-Version. Enthält strikt gültige `R-Net.json`, Semikolon-CSV, robuste Versionsausgabe, `deliver`-Target und GitHub-CI.
 
 0.2.17 — Versionsoptionen robust gemacht: `--version` und `--libversion` werden vor dem Qt-CommandLineParser abgefangen. Das Smoke-Test-Sample enthält keine absichtlichen Decoder-UNKNOWNs mehr.
@@ -106,14 +108,14 @@ RNetJsmSerialHeartbeat; serial32=0xfc801ecd; serial_tail=0x0; {typ=serial, phase
 `--version` wird vor dem Qt-CommandLineParser abgefangen und gibt die Test-App-/Library-Version aus. `--libversion` gibt nur die reine Library-Version aus, z. B.:
 
 ```text
-1.0.0
+1.0.1
 ```
 
 Bei normaler Textausgabe ohne `--out` steht die Library-Version zusätzlich in der ersten Ausgabezeile:
 
 ```text
-libversion: 1.0.0
-geladen: 187 Definitionen aus ...
+libversion: 1.0.1
+geladen: 186 Definitionen aus ...
 ```
 
 Bei `--out/-o` bleibt die Datei reine Semikolon-CSV; Versions- und Ladehinweise gehen nur ins Log.

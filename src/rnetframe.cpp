@@ -6,7 +6,11 @@
 #include <QJsonValue>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QRegularExpression>
 #include <QStringList>
+
+#include <cmath>
+#include <limits>
 
 namespace {
 QMutex &defaultCatalogMutex()
@@ -15,9 +19,9 @@ QMutex &defaultCatalogMutex()
     return mutex;
 }
 
-std::weak_ptr<const RNetMsgBroker> &defaultCatalogWeak()
+std::shared_ptr<const RNetMsgBroker> &defaultCatalogStorage()
 {
-    static std::weak_ptr<const RNetMsgBroker> catalog;
+    static std::shared_ptr<const RNetMsgBroker> catalog;
     return catalog;
 }
 
@@ -160,15 +164,15 @@ std::unique_ptr<RNetFrame> RNetFrame::decodeRNetMessage(const CanFrame &frame)
 void RNetFrame::setDefaultJsonCatalog(JsonCatalogRef json)
 {
     QMutexLocker locker(&defaultCatalogMutex());
-    defaultCatalogWeak() = json;
+    defaultCatalogStorage() = std::move(json);
 }
 
 RNetFrame::JsonCatalogRef RNetFrame::defaultJsonCatalog()
 {
     QMutexLocker locker(&defaultCatalogMutex());
 
-    if (auto catalog = defaultCatalogWeak().lock())
-        return catalog;
+    if (defaultCatalogStorage())
+        return defaultCatalogStorage();
 
     auto catalog = std::make_shared<RNetMsgBroker>();
 
@@ -178,21 +182,21 @@ RNetFrame::JsonCatalogRef RNetFrame::defaultJsonCatalog()
             continue;
 
         if (catalog->readJson(path, &error)) {
-            defaultCatalogWeak() = catalog;
+            defaultCatalogStorage() = catalog;
             return catalog;
         }
     }
 
     // Return an empty broker. Decoding then yields UNKNOWN/fallback text,
     // but callers still have a valid JSON-catalog reference member.
-    defaultCatalogWeak() = catalog;
+    defaultCatalogStorage() = catalog;
     return catalog;
 }
 
 void RNetFrame::clearDefaultJsonCatalog()
 {
     QMutexLocker locker(&defaultCatalogMutex());
-    defaultCatalogWeak().reset();
+    defaultCatalogStorage().reset();
 }
 
 RNetFrame::Detail RNetFrame::detailFromString(QString detail)
@@ -294,28 +298,40 @@ bool RNetFrame::jsonToUInt(const QJsonValue &value, quint32 *out)
     if (!out)
         return false;
 
+    quint64 number = 0;
     if (value.isDouble()) {
-        *out = static_cast<quint32>(value.toDouble());
-        return true;
-    }
+        const double d = value.toDouble();
+        if (!std::isfinite(d) || d < 0.0)
+            return false;
 
-    if (!value.isString())
+        const double rounded = std::floor(d);
+        if (d != rounded || d > static_cast<double>(std::numeric_limits<quint32>::max()))
+            return false;
+
+        number = static_cast<quint64>(rounded);
+    } else if (value.isString()) {
+        QString text = value.toString().trimmed();
+        if (text.startsWith(QLatin1Char('-')))
+            return false;
+        if (text.startsWith(QLatin1Char('+')))
+            text.remove(0, 1);
+
+        bool forcedHex = false;
+        if (text.startsWith(QStringLiteral("0x"), Qt::CaseInsensitive)) {
+            text.remove(0, 2);
+            forcedHex = true;
+        }
+        if (text.isEmpty())
+            return false;
+
+        bool ok = false;
+        const int base = forcedHex || text.contains(QRegularExpression(QStringLiteral("[A-Fa-f]"))) ? 16 : 10;
+        number = text.toULongLong(&ok, base);
+        if (!ok || number > std::numeric_limits<quint32>::max())
+            return false;
+    } else {
         return false;
-
-    QString text = value.toString().trimmed();
-    if (text.startsWith(QLatin1Char('+')))
-        text.remove(0, 1);
-
-    int base = 10;
-    if (text.startsWith(QStringLiteral("0x"), Qt::CaseInsensitive)) {
-        text.remove(0, 2);
-        base = 16;
     }
-
-    bool ok = false;
-    const quint64 number = text.toULongLong(&ok, base);
-    if (!ok)
-        return false;
 
     *out = static_cast<quint32>(number);
     return true;

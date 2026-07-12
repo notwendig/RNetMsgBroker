@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 # RNETMSGBROKER_SUBPROJECT_READY
-project(RNetMsgBroker VERSION 1.0.0 LANGUAGES CXX)
+project(RNetMsgBroker VERSION 1.0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -18,6 +18,7 @@ option(RNETMSGBROKER_BUILD_TESTAPP "Build RNetMsgBrokerTest" ${RNETMSGBROKER_IS_
 option(RNETMSGBROKER_BUILD_TRANSLATIONS "Build Qt translation files" OFF)
 option(RNETMSGBROKER_INSTALL "Install RNetMsgBroker targets and data" ${RNETMSGBROKER_IS_TOP_LEVEL})
 option(RNETMSGBROKER_DELIVER "Enable source-delivery ZIP target" ${RNETMSGBROKER_IS_TOP_LEVEL})
+option(RNETMSGBROKER_BUILD_DOCS "Build Doxygen API documentation" OFF)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
@@ -83,6 +84,20 @@ if(RNETMSGBROKER_BUILD_TESTAPP)
     )
 endif()
 
+if(RNETMSGBROKER_BUILD_DOCS)
+    find_package(Doxygen QUIET)
+    if(DOXYGEN_FOUND)
+        add_custom_target(docs
+            COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Generating RNetMsgBroker Doxygen documentation"
+            VERBATIM
+        )
+    else()
+        message(WARNING "Doxygen not found; target 'docs' is not available.")
+    endif()
+endif()
+
 if(RNETMSGBROKER_INSTALL)
     include(GNUInstallDirs)
     install(TARGETS RNetMsgBroker EXPORT RNetMsgBrokerTargets
@@ -108,6 +123,7 @@ if(RNETMSGBROKER_DELIVER)
         "${RNET_DELIVER_DIRNAME}/CMakeLists.txt"
         "${RNET_DELIVER_DIRNAME}/R-Net.json"
         "${RNET_DELIVER_DIRNAME}/README.md"
+        "${RNET_DELIVER_DIRNAME}/Doxyfile"
         "${RNET_DELIVER_DIRNAME}/CHANGELOG.md"
         "${RNET_DELIVER_DIRNAME}/AUTHORS.md"
         "${RNET_DELIVER_DIRNAME}/CONTRIBUTING.md"
@@ -121,12 +137,15 @@ if(RNETMSGBROKER_DELIVER)
         "${RNET_DELIVER_DIRNAME}/src/rnetframe.cpp"
         "${RNET_DELIVER_DIRNAME}/LICENSE"
         "${RNET_DELIVER_DIRNAME}/docs/SAFETY_AND_VALIDATION.md"
+        "${RNET_DELIVER_DIRNAME}/docs/DOXYGEN.md"
+        "${RNET_DELIVER_DIRNAME}/docs/doxygen_mainpage.md"
         "${RNET_DELIVER_DIRNAME}/scripts/validate_rnet_json.py"
         "${RNET_DELIVER_DIRNAME}/RNetMsgBroker_de_DE.ts"
         "${RNET_DELIVER_DIRNAME}/testapp/main.cpp"
         "${RNET_DELIVER_DIRNAME}/testdata/candump_sample.txt"
         "${RNET_DELIVER_DIRNAME}/testdata/candump_open_rnet_sample.txt"
         "${RNET_DELIVER_DIRNAME}/scripts/build.sh"
+        "${RNET_DELIVER_DIRNAME}/scripts/build_doxygen.sh"
         "${RNET_DELIVER_DIRNAME}/scripts/check.sh"
         "${RNET_DELIVER_DIRNAME}/scripts/candump_to_csv.sh"
         "${RNET_DELIVER_DIRNAME}/scripts/list_unknown_observed.py"

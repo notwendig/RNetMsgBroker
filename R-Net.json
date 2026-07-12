@@ -3921,28 +3921,6 @@
     {
       "extended": true,
       "remote": "data",
-      "Id-and-mask": "0xFFFFF0FF",
-      "id-result": "0x140C0001",
-      "key-mask": "0xFFFFF0FF",
-      "rnet_name": "RNetUnknownMotorRelated140C0X01",
-      "frametype": "unknown",
-      "phase": "unknown.observed",
-      "quelle": "unknown",
-      "senke": "unknown",
-      "summary": "unknown, possibly motor related",
-      "source": "redragonx/open-rnet reference/RNET_FRAME_DICTIONARY.md",
-      "id_parts": [
-        {
-          "name": "device",
-          "bit_mask": "0xF00",
-          "endian": "l",
-          "shift": 8
-        }
-      ]
-    },
-    {
-      "extended": true,
-      "remote": "data",
       "Id-and-mask": "0x1FFFFFFF",
       "id-result": "0x03C30F0F",
       "key-mask": "0x1FFFFFFF",

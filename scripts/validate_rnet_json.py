@@ -26,6 +26,7 @@ NUMERIC_KEYS = {
     "width", "size", "len", "length", "shift",
 }
 U64_MAX = (1 << 64) - 1
+U32_MAX = (1 << 32) - 1
 
 HEXBYTE_RE = re.compile(r"^(?:0x)?[0-9A-Fa-f]{1,2}(?:[\s,;:-]+(?:0x)?[0-9A-Fa-f]{1,2})*$")
 
@@ -52,6 +53,10 @@ def parse_num(v, where, max_value=U64_MAX):
         s = v.strip()
         if not s:
             raise ValueError(f"{where}: leerer Zahlen-String")
+        if s.startswith("+"):
+            s = s[1:]
+        if s.startswith("-"):
+            raise ValueError(f"{where}: negative Zahl nicht erlaubt")
         base = 16 if s.lower().startswith("0x") or any(c in s for c in "abcdefABCDEF") else 10
         n = int(s[2:] if s.lower().startswith("0x") else s, base)
     else:
@@ -60,6 +65,37 @@ def parse_num(v, where, max_value=U64_MAX):
         raise ValueError(f"{where}: außerhalb 0..0x{max_value:X}")
     return n
 
+
+
+
+def parse_int(v, where, min_value=-(1 << 63), max_value=(1 << 63) - 1):
+    if isinstance(v, bool):
+        raise ValueError(f"{where}: bool ist keine Zahl")
+    if isinstance(v, int):
+        n = v
+    elif isinstance(v, float):
+        if not math.isfinite(v) or int(v) != v or abs(v) > (1 << 53):
+            raise ValueError(f"{where}: JSON-Float ist unsicher; bitte String verwenden")
+        n = int(v)
+    elif isinstance(v, str):
+        s = v.strip()
+        if not s:
+            raise ValueError(f"{where}: leerer Zahlen-String")
+        sign = 1
+        if s.startswith("+"):
+            s = s[1:]
+        elif s.startswith("-"):
+            sign = -1
+            s = s[1:]
+        if not s:
+            raise ValueError(f"{where}: unvollständige Zahl")
+        base = 16 if s.lower().startswith("0x") or any(c in s for c in "abcdefABCDEF") else 10
+        n = sign * int(s[2:] if s.lower().startswith("0x") else s, base)
+    else:
+        raise ValueError(f"{where}: ungeeigneter Zahlentyp {type(v).__name__}")
+    if n < min_value or n > max_value:
+        raise ValueError(f"{where}: außerhalb {min_value}..{max_value}")
+    return n
 
 def parse_maybe_payload(v, where):
     """Return a stable signature for numeric or byte-string payload matchers."""
@@ -109,13 +145,15 @@ def data_signature(obj, idx):
     if isinstance(data, dict):
         value = data.get("value", data.get("data", data.get("id-result", data.get("result"))))
         mask = data.get("mask", data.get("bit_mask", data.get("bit-mask", "0xFFFFFFFFFFFFFFFF")))
-        offset = data.get("offset", data.get("byte", 0))
-        width = data.get("width", data.get("size", data.get("len", 0)))
+        offset = parse_num(data.get("offset", data.get("byte", 0)), f"frames[{idx}].data.offset", 7)
+        width = parse_num(data.get("width", data.get("size", data.get("len", 0))), f"frames[{idx}].data.width", 8)
+        if width and offset + width > 8:
+            raise ValueError(f"frames[{idx}].data: offset+width außerhalb 8-Byte-CAN-Payload")
         return (
             parse_maybe_payload(value, f"frames[{idx}].data.value") if value is not None else None,
             parse_maybe_payload(mask, f"frames[{idx}].data.mask"),
-            parse_num(offset, f"frames[{idx}].data.offset"),
-            parse_num(width, f"frames[{idx}].data.width"),
+            offset,
+            width,
             bool(data.get("big_endian", data.get("big-endian", False))),
         )
     return (parse_maybe_payload(data, f"frames[{idx}].data"), "implicit-mask", 0, 0, False)
@@ -155,11 +193,11 @@ def main(argv):
                 raise ValueError("Pflichtfeld Id-and-mask fehlt")
             # Match masks may legitimately be 0xFFFFFFFF or wider field masks;
             # do not restrict them to the 29-bit raw CAN-ID range.
-            id_mask = parse_num(mask_v, f"frames[{i}].Id-and-mask")
+            id_mask = parse_num(mask_v, f"frames[{i}].Id-and-mask", U32_MAX)
             result_v = obj.get("id-result", obj.get("id_result", obj.get("result", obj.get("value", mask_v))))
-            id_result = parse_num(result_v, f"frames[{i}].id-result")
+            id_result = parse_num(result_v, f"frames[{i}].id-result", U32_MAX)
             key_mask_v = obj.get("key-mask", obj.get("key_mask", obj.get("keyMask", id_mask)))
-            key_mask = parse_num(key_mask_v, f"frames[{i}].key-mask")
+            key_mask = parse_num(key_mask_v, f"frames[{i}].key-mask", U32_MAX)
             ext = obj.get("extended", obj.get("is_extended", obj.get("isExtended", "any")))
             rtr = obj.get("remote", obj.get("rtr", obj.get("is_remote", "any")))
             sig = (id_mask, id_result, key_mask, str(ext).lower(), str(rtr).lower(), data_signature(obj, i))
@@ -177,9 +215,24 @@ def main(argv):
                         if not isinstance(item, dict):
                             errors.append(f"frames[{i}].{list_name}[{j}]: muss Objekt sein")
                             continue
+                        offset_value = None
+                        width_value = None
                         for key, val in item.items():
-                            if key in NUMERIC_KEYS:
-                                parse_num(val, f"frames[{i}].{list_name}[{j}].{key}")
+                            if key not in NUMERIC_KEYS:
+                                continue
+                            where = f"frames[{i}].{list_name}[{j}].{key}"
+                            if key == "shift":
+                                parse_int(val, where, -63, 63)
+                            elif list_name == "id_parts" and key in {"mask", "bit_mask", "bit-mask"}:
+                                parse_num(val, where, U32_MAX)
+                            elif key in {"offset", "byte", "byte_offset"}:
+                                offset_value = parse_num(val, where, 7)
+                            elif key in {"width", "size", "len", "length"}:
+                                width_value = parse_num(val, where, 8)
+                            else:
+                                parse_num(val, where)
+                        if offset_value is not None and width_value not in (None, 0) and offset_value + width_value > 8:
+                            errors.append(f"frames[{i}].{list_name}[{j}]: offset+width außerhalb 8-Byte-CAN-Payload")
         except Exception as e:
             errors.append(str(e))
 

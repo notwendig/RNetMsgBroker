@@ -36,7 +36,7 @@ sequenceDiagram
 
 ## Tooling note
 
-Mit v1.0.0 kann die verwendete Library-Version eindeutig dokumentiert werden:
+Mit v1.0.1 kann die verwendete Library-Version eindeutig dokumentiert werden:
 
 ```bash
 RNetMsgBrokerTest --libversion

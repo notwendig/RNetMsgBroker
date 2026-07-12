@@ -18,6 +18,7 @@
 #include <QtGlobal>
 
 #include <algorithm>
+#include <limits>
 
 namespace {
 constexpr int AnyFlag = -1;
@@ -160,32 +161,9 @@ bool RNetMsgBroker::del(const QJsonObject &json, QString *errorString)
 // higher than generic families.
 QString RNetMsgBroker::toString(const CanMsg &msg, bool full) const
 {
-    Definition best;
-    bool found = false;
-    int bestScore = -1;
+    const Definition *best = bestMatch(msg);
 
-    for (auto it = m_definitionsByIdResult.cbegin(); it != m_definitionsByIdResult.cend(); ++it) {
-        const Definition &definition = it.value();
-        if (!matches(definition, msg))
-            continue;
-
-        int score = popCount32(definition.idAndMask);
-        if (definition.extended != AnyFlag)
-            score += 4;
-        if (definition.remote != AnyFlag)
-            score += 8;
-        if (definition.dataMatcher.enabled)
-            score += 64 + popCount64(definition.dataMatcher.mask);
-        score += definition.fields.size();
-
-        if (!found || score > bestScore) {
-            best = definition;
-            found = true;
-            bestScore = score;
-        }
-    }
-
-    if (!found) {
+    if (!best) {
         QStringList parts;
         parts << QStringLiteral("UNKNOWN")
               << QStringLiteral("id=%1").arg(hex32(msg.canId))
@@ -199,7 +177,7 @@ QString RNetMsgBroker::toString(const CanMsg &msg, bool full) const
         return parts.join(QStringLiteral(" "));
     }
 
-    return render(best, msg, full);
+    return render(*best, msg, full);
 }
 
 QString RNetMsgBroker::toString(quint32 canId, const QByteArray &data, bool extended, bool remote, bool full) const
@@ -214,32 +192,8 @@ QString RNetMsgBroker::toString(quint32 canId, const QByteArray &data, bool exte
 
 QJsonObject RNetMsgBroker::properties(const CanMsg &msg) const
 {
-    Definition best;
-    bool found = false;
-    int bestScore = -1;
-
-    for (auto it = m_definitionsByIdResult.cbegin(); it != m_definitionsByIdResult.cend(); ++it) {
-        const Definition &definition = it.value();
-        if (!matches(definition, msg))
-            continue;
-
-        int score = popCount32(definition.idAndMask);
-        if (definition.extended != AnyFlag)
-            score += 4;
-        if (definition.remote != AnyFlag)
-            score += 8;
-        if (definition.dataMatcher.enabled)
-            score += 64 + popCount64(definition.dataMatcher.mask);
-        score += definition.fields.size();
-
-        if (!found || score > bestScore) {
-            best = definition;
-            found = true;
-            bestScore = score;
-        }
-    }
-
-    return found ? best.originalJson : QJsonObject();
+    const Definition *best = bestMatch(msg);
+    return best ? best->originalJson : QJsonObject();
 }
 
 QJsonObject RNetMsgBroker::properties(quint32 canId, const QByteArray &data, bool extended, bool remote) const
@@ -314,14 +268,27 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
         idResult = idAndMask;
     }
 
+    if (!fitsUInt32(idAndMask) || !fitsUInt32(idResult)) {
+        if (errorString)
+            *errorString = tr("Id-and-mask/id-result liegen außerhalb 32 Bit: mask=%1 result=%2")
+                               .arg(hex64(idAndMask), hex64(idResult));
+        return false;
+    }
+
     definition->idAndMask = static_cast<quint32>(idAndMask);
     definition->idResult = static_cast<quint32>(idResult);
     definition->keyMask = definition->idAndMask;
     definition->originalJson = json;
 
     quint64 keyMask = 0;
-    if (numberByNames(json, {QStringLiteral("key-mask"), QStringLiteral("key_mask"), QStringLiteral("keyMask")}, &keyMask))
+    if (numberByNames(json, {QStringLiteral("key-mask"), QStringLiteral("key_mask"), QStringLiteral("keyMask")}, &keyMask)) {
+        if (!fitsUInt32(keyMask)) {
+            if (errorString)
+                *errorString = tr("key-mask liegt außerhalb 32 Bit: %1").arg(hex64(keyMask));
+            return false;
+        }
         definition->keyMask = static_cast<quint32>(keyMask);
+    }
 
     stringByNames(json, {QStringLiteral("rnet_name"), QStringLiteral("rnet-name"), QStringLiteral("name")}, &definition->rnetName);
     stringByNames(json, {QStringLiteral("frametype"), QStringLiteral("frame-type"), QStringLiteral("frame_type"), QStringLiteral("type")}, &definition->frameType);
@@ -366,14 +333,26 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
             quint64 mask = 0;
             if (!numberByNames(item, {QStringLiteral("mask"), QStringLiteral("bit_mask"), QStringLiteral("bit-mask")}, &mask))
                 continue;
+            if (!fitsUInt32(mask)) {
+                if (errorString)
+                    *errorString = tr("id_parts[].mask liegt außerhalb 32 Bit: %1").arg(hex64(mask));
+                return false;
+            }
+
             IdPart part;
             part.mask = static_cast<quint32>(mask);
             part.shift = trailingShift(mask);
             part.endian = endianFromJson(item, Endian::Little);
             stringByNames(item, {QStringLiteral("name"), QStringLiteral("sig_name"), QStringLiteral("sig-name")}, &part.name);
-            quint64 shift = 0;
-            if (numberByNames(item, {QStringLiteral("shift")}, &shift))
+            qint64 shift = 0;
+            if (intByNames(item, {QStringLiteral("shift")}, &shift)) {
+                if (!fitsIntRange(shift, -31, 31)) {
+                    if (errorString)
+                        *errorString = tr("id_parts[].shift außerhalb -31..31: %1").arg(shift);
+                    return false;
+                }
                 part.shift = static_cast<int>(shift);
+            }
             if (part.name.isEmpty())
                 part.name = QStringLiteral("id_%1").arg(hex32(part.mask));
             definition->idParts << part;
@@ -410,18 +389,36 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
                 field.shift = 0;
             }
 
-            quint64 shift = 0;
-            if (numberByNames(item, {QStringLiteral("shift")}, &shift))
+            qint64 shift = 0;
+            if (intByNames(item, {QStringLiteral("shift")}, &shift)) {
+                if (!fitsIntRange(shift, -63, 63)) {
+                    if (errorString)
+                        *errorString = tr("fields[].shift außerhalb -63..63: %1").arg(shift);
+                    return false;
+                }
                 field.shift = static_cast<int>(shift);
+            }
 
             quint64 offset = 0;
             if (numberByNames(item, {QStringLiteral("offset"), QStringLiteral("byte"), QStringLiteral("byte_offset")}, &offset)) {
+                if (offset > 7) {
+                    if (errorString)
+                        *errorString = tr("fields[].offset außerhalb 0..7: %1").arg(offset);
+                    return false;
+                }
                 field.offset = static_cast<int>(offset);
                 field.hasByteWindow = true;
             }
 
             quint64 width = 0;
             if (numberByNames(item, {QStringLiteral("width"), QStringLiteral("size"), QStringLiteral("len"), QStringLiteral("length")}, &width)) {
+                if (width > 8 || (width > 0 && offset + width > 8)) {
+                    if (errorString)
+                        *errorString = tr("fields[].width/offset außerhalb klassischer 8-Byte-CAN-Payload: offset=%1 width=%2")
+                                           .arg(offset)
+                                           .arg(width);
+                    return false;
+                }
                 field.width = static_cast<int>(width);
                 field.hasByteWindow = true;
             }
@@ -457,11 +454,25 @@ bool RNetMsgBroker::parseDefinition(const QJsonObject &json, Definition *definit
             if (numberByNames(dataObject, {QStringLiteral("mask"), QStringLiteral("bit_mask"), QStringLiteral("bit-mask")}, &mask))
                 definition->dataMatcher.mask = mask;
             quint64 offset = 0;
-            if (numberByNames(dataObject, {QStringLiteral("offset"), QStringLiteral("byte")}, &offset))
+            if (numberByNames(dataObject, {QStringLiteral("offset"), QStringLiteral("byte")}, &offset)) {
+                if (offset > 7) {
+                    if (errorString)
+                        *errorString = tr("data.offset außerhalb 0..7: %1").arg(offset);
+                    return false;
+                }
                 definition->dataMatcher.offset = static_cast<int>(offset);
+            }
             quint64 width = 0;
-            if (numberByNames(dataObject, {QStringLiteral("width"), QStringLiteral("size"), QStringLiteral("len")}, &width))
+            if (numberByNames(dataObject, {QStringLiteral("width"), QStringLiteral("size"), QStringLiteral("len")}, &width)) {
+                if (width > 8 || (width > 0 && offset + width > 8)) {
+                    if (errorString)
+                        *errorString = tr("data.width/offset außerhalb klassischer 8-Byte-CAN-Payload: offset=%1 width=%2")
+                                           .arg(offset)
+                                           .arg(width);
+                    return false;
+                }
                 definition->dataMatcher.width = static_cast<int>(width);
+            }
             definition->dataMatcher.bigEndian = (endianFromJson(dataObject, Endian::Little) == Endian::Big);
             boolByNames(dataObject,
                         {QStringLiteral("big_endian"), QStringLiteral("big-endian")},
@@ -506,6 +517,51 @@ bool RNetMsgBroker::matches(const Definition &definition, const CanMsg &msg) con
     }
 
     return true;
+}
+
+int RNetMsgBroker::matchScore(const Definition &definition)
+{
+    int score = popCount32(definition.idAndMask);
+    if (definition.extended != AnyFlag)
+        score += 4;
+    if (definition.remote != AnyFlag)
+        score += 8;
+    if (definition.dataMatcher.enabled)
+        score += 64 + popCount64(definition.dataMatcher.mask);
+    score += definition.fields.size();
+    return score;
+}
+
+const RNetMsgBroker::Definition *RNetMsgBroker::bestMatch(const CanMsg &msg, int *score) const
+{
+    const Definition *best = nullptr;
+    int bestScore = -1;
+
+    for (auto it = m_definitionsByIdResult.cbegin(); it != m_definitionsByIdResult.cend(); ++it) {
+        const Definition &definition = it.value();
+        if (!matches(definition, msg))
+            continue;
+
+        const int currentScore = matchScore(definition);
+        if (!best || currentScore > bestScore) {
+            best = &definition;
+            bestScore = currentScore;
+        }
+    }
+
+    if (score)
+        *score = bestScore;
+    return best;
+}
+
+bool RNetMsgBroker::fitsUInt32(quint64 value)
+{
+    return value <= std::numeric_limits<quint32>::max();
+}
+
+bool RNetMsgBroker::fitsIntRange(qint64 value, int minValue, int maxValue)
+{
+    return value >= minValue && value <= maxValue;
 }
 
 // Render the selected definition. Short mode is stable for logs; full mode
@@ -743,6 +799,14 @@ bool RNetMsgBroker::numberByNames(const QJsonObject &object, const QStringList &
     return jsonValueToUInt64(jsonValue, value);
 }
 
+bool RNetMsgBroker::intByNames(const QJsonObject &object, const QStringList &names, qint64 *value)
+{
+    QJsonValue jsonValue;
+    if (!valueByNames(object, names, &jsonValue))
+        return false;
+    return jsonValueToInt64(jsonValue, value);
+}
+
 bool RNetMsgBroker::jsonValueToUInt64(const QJsonValue &value, quint64 *number)
 {
     if (value.isDouble()) {
@@ -766,16 +830,19 @@ bool RNetMsgBroker::jsonValueToUInt64(const QJsonValue &value, quint64 *number)
     }
 
     if (value.isString()) {
-        QString text = value.toString().trimmed();
+        QString original = value.toString().trimmed();
+        if (original.startsWith(QLatin1Char('-')))
+            return false;
+
+        const bool forcedHex = original.startsWith(QStringLiteral("0x"), Qt::CaseInsensitive)
+                               || original.startsWith(QStringLiteral("+0x"), Qt::CaseInsensitive);
+        QString text = trimHexPrefix(original);
+        if (text.isEmpty())
+            return false;
+
         bool ok = false;
-        quint64 parsed = 0;
-        if (text.startsWith(QStringLiteral("0x"), Qt::CaseInsensitive)) {
-            parsed = trimHexPrefix(text).toULongLong(&ok, 16);
-        } else if (text.contains(QRegularExpression(QStringLiteral("[A-Fa-f]")))) {
-            parsed = text.toULongLong(&ok, 16);
-        } else {
-            parsed = text.toULongLong(&ok, 10);
-        }
+        const int base = forcedHex || text.contains(QRegularExpression(QStringLiteral("[A-Fa-f]"))) ? 16 : 10;
+        const quint64 parsed = text.toULongLong(&ok, base);
         if (!ok)
             return false;
         if (number)
@@ -784,6 +851,72 @@ bool RNetMsgBroker::jsonValueToUInt64(const QJsonValue &value, quint64 *number)
     }
 
     return false;
+}
+
+bool RNetMsgBroker::jsonValueToInt64(const QJsonValue &value, qint64 *number)
+{
+    if (value.isDouble()) {
+        const double d = value.toDouble();
+        if (!std::isfinite(d))
+            return false;
+
+        const double rounded = std::floor(d);
+        if (!qFuzzyCompare(d + 1.0, rounded + 1.0))
+            return false;
+
+        constexpr double kMinExactJsonInteger = -9007199254740992.0; // -2^53
+        constexpr double kMaxExactJsonInteger = 9007199254740992.0;  //  2^53
+        if (d < kMinExactJsonInteger || d > kMaxExactJsonInteger)
+            return false;
+
+        if (number)
+            *number = static_cast<qint64>(rounded);
+        return true;
+    }
+
+    if (!value.isString())
+        return false;
+
+    QString text = value.toString().trimmed();
+    if (text.isEmpty())
+        return false;
+
+    bool negative = false;
+    if (text.startsWith(QLatin1Char('+'))) {
+        text.remove(0, 1);
+    } else if (text.startsWith(QLatin1Char('-'))) {
+        negative = true;
+        text.remove(0, 1);
+    }
+
+    const bool forcedHex = text.startsWith(QStringLiteral("0x"), Qt::CaseInsensitive);
+    if (forcedHex)
+        text.remove(0, 2);
+    if (text.isEmpty())
+        return false;
+
+    bool ok = false;
+    const int base = forcedHex || text.contains(QRegularExpression(QStringLiteral("[A-Fa-f]"))) ? 16 : 10;
+    const quint64 magnitude = text.toULongLong(&ok, base);
+    if (!ok)
+        return false;
+
+    const quint64 maxPositive = static_cast<quint64>(std::numeric_limits<qint64>::max());
+    if (!negative) {
+        if (magnitude > maxPositive)
+            return false;
+        if (number)
+            *number = static_cast<qint64>(magnitude);
+        return true;
+    }
+
+    if (magnitude > maxPositive + 1ull)
+        return false;
+    if (number)
+        *number = (magnitude == maxPositive + 1ull)
+                      ? std::numeric_limits<qint64>::min()
+                      : -static_cast<qint64>(magnitude);
+    return true;
 }
 
 int RNetMsgBroker::trailingShift(quint64 mask)

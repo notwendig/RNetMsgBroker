@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.1
+
+- Matching-Auswahl in `RNetMsgBroker` zusammengeführt: `toString()` und `properties()` nutzen denselben Best-Match-Pfad ohne doppelte Decoder-Logik.
+- JSON-Zahlenprüfung für CAN-ID-Masken und Ergebnisse gehärtet, damit Werte oberhalb 32 Bit nicht still abgeschnitten werden.
+- Signierte `shift`-Werte werden korrekt gelesen; negative Shifts werden nicht mehr durch den unsigned Parser unmöglich gemacht.
+- Bytefenster (`offset`/`width`) werden validiert, bevor sie nach `int` übernommen werden.
+- `RNetFrame` hält den Default-Katalog nun stark gecacht statt nur als `weak_ptr`; das vermeidet wiederholtes Nachladen und instabile Default-Katalog-Lebensdauer.
+- `RNetFrame::jsonToUInt()` verwirft negative, nichtganzzahlige und zu große Werte statt sie still nach `quint32` zu casten.
+- Doppelte JSON-Matcher-Definition `RNetUnknownMotorRelated140C0X01` entfernt; die präzisere vorhandene Definition `RNetMotorUnknown140C` bleibt erhalten.
+- `scripts/validate_rnet_json.py` prüft zusätzlich 32-Bit-ID-Grenzen und signierte Shift-Werte.
+
 ## 1.0.0
 
 - Erste stabile GitHub-Release-Version.
