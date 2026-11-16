@@ -1,5 +1,8 @@
 # RNetMsgBroker
 
+[English](README.en.md)
+
+
 ## Version
 
 1.0.1 — Optimierungs- und Fehlerbehebungsrelease: gemeinsamer Best-Match-Pfad, gehärtete JSON-Zahlenprüfung, stabiler Default-Katalog-Cache und 186 eindeutige Matcher.
